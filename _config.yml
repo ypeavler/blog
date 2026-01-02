@@ -27,6 +27,7 @@ plugins:
   - jekyll-remote-theme
   - jekyll-mermaid
   - jekyll-toc
+  - jekyll-asciidoc
 
 sass:
   quiet_deps: true
