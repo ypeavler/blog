@@ -1,6 +1,8 @@
 source "https://rubygems.org"
 
 gem "jekyll", "~> 3.10.0"
+gem "github-pages"
+gem "kramdown-parser-gfm"
 gem "jekyll-feed"
 gem "jekyll-remote-theme"
 gem "jekyll-mermaid"
