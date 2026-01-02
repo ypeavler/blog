@@ -13,7 +13,7 @@ Test your knowledge of networking fundamentals, from the OSI model to Kubernetes
   padding: .4rem 0;
   margin-bottom: .6rem;
   border-bottom: 1px solid var(--md-default-fg-color--lightest);
-  font-size: .65rem;
+  font-size: .9rem;
   color: var(--md-default-fg-color--light);
 }
 .nq-header strong { color: var(--md-primary-fg-color); }
@@ -23,7 +23,7 @@ Test your knowledge of networking fundamentals, from the OSI model to Kubernetes
 .nq-card { display: none; }
 .nq-card.active { display: block; min-height: 420px; }
 
-.nq-question { font-size: .7rem; line-height: 1.5; margin-bottom: .6rem; }
+.nq-question { font-size: .9rem; line-height: 1.5; margin-bottom: .6rem; }
 
 .nq-options { display: flex; flex-direction: column; gap: .3rem; }
 .nq-opt { position: relative; }
@@ -33,7 +33,7 @@ Test your knowledge of networking fundamentals, from the OSI model to Kubernetes
   background: var(--md-code-bg-color);
   border: 1px solid var(--md-default-fg-color--lightest);
   border-radius: .2rem; cursor: pointer;
-  font-size: .65rem; line-height: 1.45;
+  font-size: .9rem; line-height: 1.45;
   transition: border-color .15s;
 }
 .nq-opt label:hover { border-color: var(--md-primary-fg-color); }
@@ -50,7 +50,7 @@ Test your knowledge of networking fundamentals, from the OSI model to Kubernetes
   display: none;
   margin-top: .3rem;
   padding: .4rem .6rem;
-  font-size: .6rem;
+  font-size: .9rem;
   line-height: 1.45;
   border-radius: .2rem;
 }
@@ -62,7 +62,7 @@ Test your knowledge of networking fundamentals, from the OSI model to Kubernetes
 .nq-opt-exp.wrong .nq-opt-exp-title { color: #cf222e; }
 .nq-opt-exp-correct { margin-top: .3rem; padding-top: .3rem; border-top: 1px solid var(--md-default-fg-color--lightest); }
 .nq-learn-more {
-  display: inline-block; margin-top: .3rem; font-size: .55rem;
+  display: inline-block; margin-top: .3rem; font-size: .85rem;
   color: var(--md-primary-fg-color) !important; text-decoration: none;
 }
 .nq-learn-more:hover { text-decoration: underline; }
@@ -70,14 +70,14 @@ Test your knowledge of networking fundamentals, from the OSI model to Kubernetes
 .nq-hint { margin-top: .6rem; }
 .nq-hint-btn {
   background: none; border: none; color: var(--md-default-fg-color--light);
-  font: inherit; font-size: .6rem; cursor: pointer; padding: 0;
+  font: inherit; font-size: .9rem; cursor: pointer; padding: 0;
 }
 .nq-hint-btn:hover { color: var(--md-primary-fg-color); }
 .nq-hint-text {
   display: none; margin-top: .3rem; padding: .4rem .5rem;
   background: rgba(var(--md-primary-fg-color--rgb),.05);
   border-left: 2px solid var(--md-primary-fg-color);
-  font-size: .6rem; line-height: 1.45;
+  font-size: .9rem; line-height: 1.45;
 }
 .nq-hint-text.visible { display: block; }
 
@@ -87,7 +87,7 @@ Test your knowledge of networking fundamentals, from the OSI model to Kubernetes
   border-top: 1px solid var(--md-default-fg-color--lightest);
 }
 .nq-nav-btn {
-  padding: .35rem .75rem; font: inherit; font-size: .6rem; font-weight: 500;
+  padding: .35rem .75rem; font: inherit; font-size: .9rem; font-weight: 500;
   border-radius: .2rem; cursor: pointer;
 }
 .nq-nav-btn:disabled { opacity: .35; cursor: not-allowed; }
@@ -108,16 +108,16 @@ Test your knowledge of networking fundamentals, from the OSI model to Kubernetes
 .nq-results.active { display: block; }
 .nq-results-emoji { font-size: 1.75rem; margin-bottom: .3rem; }
 .nq-results-score { font-size: 1.25rem; font-weight: 700; color: var(--md-primary-fg-color); }
-.nq-results-text { font-size: .65rem; color: var(--md-default-fg-color--light); margin: .15rem 0 .6rem; }
+.nq-results-text { font-size: .9rem; color: var(--md-default-fg-color--light); margin: .15rem 0 .6rem; }
 .nq-results-stats { display: flex; justify-content: center; gap: 1.25rem; margin-bottom: .6rem; }
 .nq-results-stat-val { font-size: .85rem; font-weight: 700; }
 .nq-results-stat-val.correct { color: #2da44e; }
 .nq-results-stat-val.wrong { color: #cf222e; }
 .nq-results-stat-lbl { font-size: .55rem; color: var(--md-default-fg-color--light); }
-.nq-results-msg { font-size: .65rem; margin-bottom: .8rem; }
+.nq-results-msg { font-size: .9rem; margin-bottom: .8rem; }
 .nq-reset {
   background: var(--md-primary-fg-color); color: var(--md-primary-bg-color);
-  border: none; padding: .35rem .85rem; font: inherit; font-size: .65rem;
+  border: none; padding: .35rem .85rem; font: inherit; font-size: .9rem;
   font-weight: 500; border-radius: .2rem; cursor: pointer;
 }
 .nq-reset:hover { opacity: .9; }
