@@ -2321,7 +2321,7 @@ The next time you're troubleshooting a networking issue or designing a new syste
 *This article is part of the "Learning in a Hurry" series, designed to help engineers quickly understand complex technical concepts through analogies and practical examples.*
 
 
-<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 <script>
   mermaid.initialize({ startOnLoad: true });
-</script>
+</script> -->

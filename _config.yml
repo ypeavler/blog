@@ -23,6 +23,10 @@ minima:
 # Build settings
 baseurl: /blog
 remote_theme: jekyll/minima
+plugins:
+  - jekyll-mermaid
+  - jekyll-toc
+  - jekyll-asciidoc
 
 sass:
   quiet_deps: true
