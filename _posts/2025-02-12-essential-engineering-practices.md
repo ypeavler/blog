@@ -125,7 +125,7 @@ def process_user_request(request):
 ([Read more: Martin Fowler on the Test Pyramid](https://martinfowler.com/bliki/TestPyramid.html))  
 A solid test strategy follows the **Test Pyramid** model:
 
-![Test Pyramid](https://martinfowler.com/bliki/images/testPyramid/testPyramid.png)
+![Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid/testPyramid.png)
 
 ### **Test Pyramid Breakdown:**  
 - **Unit Tests (Fast, 70-80%)** – Test individual functions; should run in milliseconds.
