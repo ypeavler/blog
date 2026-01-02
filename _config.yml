@@ -1,18 +1,33 @@
-theme: minima
-minima:
-  skin: dark
-  hide_site_feed_link: true 
-  social_links:
-    - title: Jekyll repository at GitHub
-      icon: github
-      url: "https://github.com/jekyll/jekyll"
-    - title: Jekyll at X (formerly Twitter)
-      icon: x-twitter
-      url: "https://x.com/jekyllrb"
-  nav_pages:
-    - about.md
-
 site:
   author:
-  name: John Smith
-  email: "john.smith@foobar.com"
+  name: Yuva Peavler
+  email: "yuva.peavler@gmail.com"
+title: Yuva's Blog
+author:
+  name: ypeavler
+  email: yuva.peavler@gmail.com
+description: >
+  Write an awesome description for your new site here. You can edit this
+  line in _config.yml. It will appear in your document head meta (for
+  Google search results) and in your feed.xml site description.
+
+minima:
+  hide_site_feed_link: true
+  skin: dark
+  date_format: "%b %-d, %Y"
+  social_links:
+    - { icon: "github", title: "Minima Theme repository at GitHub", url: "https://github.com/jekyll/minima" }
+    - { icon: "x-twitter", title: "Jekyll profile at X (formerly Twitter)", url: "https://x.com/jekyllrb" }
+  show_excerpts: true
+
+# Build settings
+baseurl: /blog
+remote_theme: jekyll/minima
+plugins:
+  - jekyll-remote-theme
+  - jekyll-mermaid
+  - jekyll-toc
+
+sass:
+  quiet_deps: true
+  silence_deprecations: [import]

@@ -1,8 +1,9 @@
 ---
 layout: post
+title: "10 Essential Engineering Practices for Junior Developers"
+author:
+- Yuva Peavler
 ---
-
-# **10 Essential Engineering Practices for Junior Developers**
 
 ## **Introduction**  
 Great software engineering is not just about writing code that works—it's about writing code that is clean, maintainable, and scalable. The best engineers develop **good habits** that make their code easier to read, debug, and extend over time.  
