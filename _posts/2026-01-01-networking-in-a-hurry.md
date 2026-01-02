@@ -13,9 +13,8 @@ This guide covers networking technologies from the fundamentals to modern cloud-
   <iframe src="https://www.youtube.com/embed/cjQLXylqrKM" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allowfullscreen title="Networking Overview Video"></iframe>
 </div>
 
-/// tip | Test Your Knowledge
+**Test Your Knowledge**
 Ready to test your understanding? Take the **[Networking Quiz](2026-01-01-networking-basics-quiz.md)** — 34 questions covering everything from ARP to service mesh.
-///
 
 ---
 
@@ -2320,3 +2319,9 @@ The next time you're troubleshooting a networking issue or designing a new syste
 ---
 
 *This article is part of the "Learning in a Hurry" series, designed to help engineers quickly understand complex technical concepts through analogies and practical examples.*
+
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: true });
+</script>
