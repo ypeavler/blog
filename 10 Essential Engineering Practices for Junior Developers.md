@@ -1,3 +1,7 @@
+---
+layout: post
+---
+
 # **10 Essential Engineering Practices for Junior Developers**
 
 ## **Introduction**  
