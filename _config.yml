@@ -1,1 +1,18 @@
-remote_theme: "jekyll/minima@1e8a445"
+theme: minima
+minima:
+  skin: dark
+  hide_site_feed_link: true 
+  social_links:
+    - title: Jekyll repository at GitHub
+      icon: github
+      url: "https://github.com/jekyll/jekyll"
+    - title: Jekyll at X (formerly Twitter)
+      icon: x-twitter
+      url: "https://x.com/jekyllrb"
+  nav_pages:
+    - about.md
+
+site:
+  author:
+  name: John Smith
+  email: "john.smith@foobar.com"
