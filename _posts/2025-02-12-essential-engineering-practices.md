@@ -1,8 +1,6 @@
 ---
 layout: post
 title: "10 Essential Engineering Practices for Junior Developers"
-author:
-- Yuva Peavler
 ---
 
 ## **Introduction**  
