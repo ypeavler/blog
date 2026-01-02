@@ -105,7 +105,7 @@ When Host A wants to send a packet to Host B (same subnet), it knows B's IP addr
 
 Think of IP addresses as street addresses and MAC addresses as the actual mailbox. Before you can deliver a letter, you need to know which mailbox (MAC) belongs to that address (IP). ARP is like shouting down the street: "Who lives at 192.168.1.20?" and waiting for the owner to respond with their mailbox number.
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant A as Host A<br/>192.168.1.10
@@ -131,7 +131,7 @@ sequenceDiagram
 
     A->>SW: Send packet<br/>Dst MAC: BB:BB:BB:BB:BB:BB
     SW->>B: Delivered!
-```
+</div>
 
 ---
 
@@ -159,7 +159,7 @@ A *switch* is a Layer 2 device that learns which MAC addresses are on which port
 
 #### Q: How does MAC learning work on a switch?
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant A as Host A<br/>Port 1
@@ -181,7 +181,7 @@ sequenceDiagram
     SW->>A: Frame delivered
 
     Note over SW: Future A↔B traffic<br/>is unicast, not flooded
-```
+</div>
 
 ---
 
@@ -350,7 +350,7 @@ Think of it like sending a letter from New York to Los Angeles: your envelope ha
 
 The diagram below shows how a packet travels from Host A (192.168.1.50) to Host B (10.0.5.100) through two routers, demonstrating how MAC addresses change at each hop while IP addresses remain unchanged:
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant A as Host A<br/>192.168.1.50
@@ -374,7 +374,7 @@ sequenceDiagram
     R2->>B: Frame<br/>MAC: R2:02 → BB:BB<br/>IP: 192.168.1.50 → 10.0.5.100
 
     Note over A,B: IP addresses never change!<br/>MAC addresses change at each hop.
-```
+</div>
 
 **What happens at each router:**
 
@@ -418,7 +418,7 @@ Every IP packet has a *TTL (Time To Live)* field that decrements at each router.
 
 *NAT (Network Address Translation)* allows multiple devices with private IPs to share a single public IP. NAT is like an apartment building's mailroom. You write a letter with your apartment number (private IP like 192.168.1.10) as the return address, but when it goes out to the world, the mailroom clerk **changes the return address** on the envelope to the building's public address (203.0.113.50) and keeps a note: "Apartment 10's letter is actually from port 40001." When a reply comes back addressed to the building, the clerk looks up their notes and forwards it to your apartment. The outside world never sees your private address!
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant A as Host A<br/>192.168.1.10
@@ -438,7 +438,7 @@ sequenceDiagram
     Note over NAT: Lookup NAT table<br/>Forward to 192.168.1.10:54321
 
     NAT->>A: Response<br/>Dst: 192.168.1.10:54321
-```
+</div>
 
 ---
 
@@ -706,7 +706,7 @@ TCP is like **registered mail with delivery confirmation**. You send a letter, t
 
 Before TCP can send data, it establishes a connection through a three-way handshake. This ensures both sides are ready to communicate and agree on initial sequence numbers. Think of it like a phone call: you dial (SYN), the other person picks up and says "hello" (SYN-ACK), and you confirm "yes, I can hear you" (ACK). Only then do you start talking.
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant C as Client
@@ -720,7 +720,7 @@ sequenceDiagram
 
     C->>S: Data (seq=101)
     S->>C: ACK (ack=201)
-```
+</div>
 
 ---
 
@@ -785,7 +785,7 @@ By increasing these values in /etc/sysctl.conf, you allow the sliding window to 
 
 A *VLAN (Virtual Local Area Network)* is a logical network segment created within a physical network. It allows you to group devices together logically, even if they're not physically connected to the same switch. VLANs are identified by a VLAN ID (a number from 1-4094) that is added to Ethernet frames as a tag. Think of VLANs as creating separate "virtual neighborhoods" within the same physical building—devices in VLAN 10 can't directly communicate with devices in VLAN 20, even though they might be connected to the same physical switch, just like people in different apartment buildings on the same street.
 
-```mermaid
+<div class="mermaid">
 flowchart LR
     subgraph VLAN10["VLAN 10 (Engineering)"]
         A[Host A]
@@ -803,7 +803,7 @@ flowchart LR
     B <--> SW
     C <--> SW
     D <--> SW
-```
+</div>
 
 ---
 
@@ -829,7 +829,7 @@ A VLAN adds a *4-byte 802.1Q tag* to the Ethernet frame. The switch reads this t
 
 When Host A (192.168.10.5) sends to Host B (192.168.10.6) on VLAN 10, the switch reads the 802.1Q tag and forwards the frame only to ports in VLAN 10, ensuring Host C on VLAN 20 never sees the traffic:
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant A as Host A<br/>VLAN 10
@@ -848,7 +848,7 @@ sequenceDiagram
     Note over SW,C: Frame NOT sent to C<br/>(Different VLAN)
 
     Note over A,C: Broadcast isolation!<br/>C never sees A's traffic
-```
+</div>
 
 ---
 
@@ -875,7 +875,7 @@ Think of VXLAN like putting an envelope inside another envelope. You write your 
 
 In a multi-tenant environment, VXLAN is a cornerstone. It allows different tenants to have their own logically isolated networks (using unique VNIs) that share the same underlying physical infrastructure, preventing tenants from seeing each other's traffic.
 
-```mermaid
+<div class="mermaid">
 flowchart TB
     subgraph Overlay["OVERLAY NETWORK (Virtual)"]
         direction LR
@@ -896,7 +896,7 @@ flowchart TB
     R1 <-->|"IP Routing"| R2
     R2 <-->|"UDP Packet"| VTEP2
     VTEP2 <-->|"L2 Frame"| VM2
-```
+</div>
 
 ---
 
@@ -923,7 +923,7 @@ The physical switches just saw traffic between servers, while the VMs felt like 
 
 The diagram below shows the complete VXLAN encapsulation and decapsulation process:
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant VM1 as VM1
@@ -950,7 +950,7 @@ sequenceDiagram
     VTEP2->>VM2: L2 Frame to VM2
 
     Note over VM1,VM2: VM2 receives frame<br/>as if on same switch
-```
+</div>
 
 ---
 
@@ -1079,7 +1079,7 @@ Geneve TLV options can carry various types of metadata. Common examples include:
 
 In cloud-native environments, Geneve TLV options carry security policies and source identity. When the frontend workload sends a packet, it's like writing a letter and putting it in an inner envelope. The SDN controller (like a security guard) checks the sender's ID, looks up the security policy, and attaches stickers to the outer envelope: "From: frontend-workload", "Policy: allow-frontend-to-backend", "Security Level: High". When the letter arrives at the destination building, the security guard there reads the stickers, verifies "Yes, frontend is allowed to talk to backend," and only then opens the envelope and delivers it. If the stickers said "Deny," the letter would be rejected without even opening it!
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant VM1 as VM1
@@ -1101,7 +1101,7 @@ sequenceDiagram
     Node2->>VM2: Packet delivered
 
     Note over VM1,VM2: Policy enforced<br/>via Geneve metadata
-```
+</div>
 
 ---
 
@@ -1215,7 +1215,7 @@ However, cgroups don't create network connectivity or isolation—that's what ne
 
 *CNI (Container Network Interface)* is the standard for Kubernetes networking plugins. When a pod starts, it's like a new apartment being built. The CNI plugin is like the city planning department that assigns the new apartment an address (IP address), connects it to the street (creates veth pair), and gives the resident a mailbox (network namespace). The pod can now send and receive letters (packets) just like any other apartment in the city!
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant Kubelet as kubelet
@@ -1231,7 +1231,7 @@ sequenceDiagram
     CNI->>Kubelet: Success
 
     Note over Kubelet,Pod: Pod ready
-```
+</div>
 
 ---
 
@@ -1305,7 +1305,7 @@ Native routing mode eliminates overlay encapsulation, routing pod IPs directly t
 
 Cilium supports BGP for native routing mode, allowing it to advertise pod CIDR routes to network infrastructure without using overlay encapsulation. Each Cilium node runs a BGP daemon that advertises its pod CIDR to BGP peers (routers, cloud provider route tables), enabling the network infrastructure to learn pod IP routes and route traffic directly to pods without encapsulation overhead.
 
-```mermaid
+<div class="mermaid">
 flowchart TB
     subgraph K8s["Kubernetes Cluster"]
         subgraph Node1["Node 1 Cilium Agent"]
@@ -1338,7 +1338,7 @@ flowchart TB
     Router --> CloudRT
 
     Router -.->|"Learns routes: 10.244.1.0/24 → Node1 10.244.2.0/24 → Node2 10.244.3.0/24 → Node3"| Router
-```
+</div>
 
 **Use cases for Cilium BGP:**
 
@@ -1392,7 +1392,7 @@ For enterprise and multi-tenant Kubernetes deployments, **Cilium** and **Calico*
 
 When two pods are on the same node, they communicate through the node's bridge. When two pods are on the same node, it's like two apartments in the same building. You write a letter to your neighbor, drop it in the building's mailroom (bridge), and the mailroom immediately delivers it to your neighbor's apartment. No need for the postal service—it's all handled within the building!
 
-```mermaid
+<div class="mermaid">
 flowchart TB
     subgraph Node["Kubernetes Node"]
         subgraph Pod1["Pod 1 10.244.1.5"]
@@ -1410,7 +1410,7 @@ flowchart TB
     Pod2 --> BRIDGE
     BRIDGE <--> Pod1
     BRIDGE <--> Pod2
-```
+</div>
 
 ---
 
@@ -1420,7 +1420,7 @@ flowchart TB
 
 When pods are on different nodes, the CNI plugin uses an overlay network (VXLAN or Geneve). It's like sending a letter from one building to another across town. You write your letter (original packet) and put it in an inner envelope addressed to your friend's apartment (destination pod IP). The building's mailroom (CNI plugin) puts that inner envelope inside an outer envelope addressed to the destination building (node IP). The postal service (underlay network) delivers the outer envelope to the destination building, where the mailroom there opens it and delivers the inner envelope to your friend's apartment. Your friend never sees the outer envelope—they just receive your letter!
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant Pod1 as Pod1
@@ -1442,7 +1442,7 @@ sequenceDiagram
     CNI2->>Pod2: Packet delivered
 
     Note over Pod1,Pod2: Pods on same network
-```
+</div>
 
 ---
 
@@ -1452,7 +1452,7 @@ sequenceDiagram
 
 Cilium is a popular CNI plugin that uses Geneve overlay and eBPF for advanced networking. With Cilium and Geneve, when you send a letter, the building's security system (Cilium agent) checks your ID, looks up the security policy, and attaches security stickers to the outer envelope: "From: frontend-workload", "Policy: allow-frontend-to-backend", "Security Clearance: Level 3". When the letter arrives at the destination building, the security guard there reads the stickers, verifies the policy allows this communication, and only then delivers the letter. If the stickers don't match the policy, the letter is rejected!
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant Pod1 as Frontend
@@ -1474,7 +1474,7 @@ sequenceDiagram
     Node2->>Pod2: Packet delivered
 
     Note over Pod1,Pod2: Policy enforced<br/>via Geneve metadata
-```
+</div>
 
 ---
 
@@ -1509,7 +1509,7 @@ Pods are ephemeral — they can be created, destroyed, and moved. *Services* pro
 3. When traffic arrives at a node destined for the ClusterIP, kube-proxy's iptables rules perform DNAT (Destination NAT), rewriting the destination IP from the ClusterIP to a selected pod IP (load balanced across available pods)
 4. If the selected pod is on a different node, the overlay network (VXLAN/Geneve) handles routing the packet to the destination pod's node
 
-```mermaid
+<div class="mermaid">
 flowchart TB
     subgraph Service["Service: backend ClusterIP: 10.96.0.100:80"]
         SVC_IP["ClusterIP 10.96.0.100"]
@@ -1528,7 +1528,7 @@ flowchart TB
     SVC_IP --> KubeProxy
     KubeProxy --> Pod1
     KubeProxy --> Pod2
-```
+</div>
 
 ---
 
@@ -1568,7 +1568,7 @@ Endpoints bridge the gap between:
 
 Think of it like a phone book: The Service is like a business name ("Acme Corp"), and Endpoints is the phone book that lists all current phone numbers (pod IPs) for that business. When employees (pods) come and go, the phone book (Endpoints) is updated automatically.
 
-```mermaid
+<div class="mermaid">
 flowchart LR
     subgraph Service["Service backend ClusterIP: 10.96.0.100 (Stable, never changes)"]
         SVC["Service Resource"]
@@ -1596,7 +1596,7 @@ flowchart LR
     KP -->|"Routes traffic"| P1
     KP -->|"Routes traffic"| P2
     KP -->|"Routes traffic"| P3
-```
+</div>
 
 ---
 
@@ -1688,7 +1688,7 @@ endpoints:
 
 Kubernetes provides DNS for services via CoreDNS. Applications can use service names (e.g., `backend.default.svc.cluster.local`) instead of IP addresses. CoreDNS resolves service names to Service IPs, which kube-proxy then routes to pod IPs.
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant App as App
@@ -1710,7 +1710,7 @@ sequenceDiagram
 
     Backend->>KubeProxy: 200 OK
     KubeProxy->>App: 200 OK
-```
+</div>
 
 ---
 
@@ -1760,7 +1760,7 @@ Ingress provides HTTP/HTTPS routing from outside the cluster to Services. Unlike
 
 Ingress works *on top of* Services—it routes external traffic to the appropriate Service, which then routes to pods. For advanced routing (canary, A/B testing, mTLS), service mesh is often used instead of or alongside Ingress.
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant User as User
@@ -1784,7 +1784,7 @@ sequenceDiagram
     SVC->>IC: 200 OK
     IC->>LB: 200 OK
     LB->>User: 200 OK
-```
+</div>
 
 ---
 
@@ -1794,7 +1794,7 @@ sequenceDiagram
 
 Network Policies allow you to control traffic between pods using label selectors. They act as pod-level firewalls, allowing or denying traffic based on source pod labels, destination pod labels, and ports. Network Policies are enforced by CNI plugins (Cilium, Calico) at the kernel level, before packets reach the pod.
 
-```mermaid
+<div class="mermaid">
 flowchart TB
     subgraph Allowed["Allowed Traffic"]
         direction LR
@@ -1811,7 +1811,7 @@ flowchart TB
         F2 -.->|"Port 8081"| B2
         OTHER -.->|"Any port"| B2
     end
-```
+</div>
 
 ---
 
@@ -2097,7 +2097,7 @@ Service mesh leverages Kubernetes service discovery and DNS, then adds identity-
 
 This section details the **complete packet journey** in a Kubernetes cluster augmented with a service mesh, illustrating the interplay of all the components discussed so far. The diagram below shows the flow using SPIFFE identities for workload authentication:
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant APP1 as Frontend
@@ -2128,7 +2128,7 @@ sequenceDiagram
     ENV1->>APP1: 200 OK
 
     Note over APP1,APP2: Security & observability<br/>handled by mesh
-```
+</div>
 
 ---
 
@@ -2219,7 +2219,7 @@ Identity-based security rules are created as **Kubernetes Custom Resources** (CR
 
 Here's the complete journey of a packet from one pod to another:
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     autonumber
     participant AppA as AppA
@@ -2260,7 +2260,7 @@ sequenceDiagram
 
     AppB->>SidecarB: 200 OK
     SidecarB->>AppA: Encrypted response
-```
+</div>
 
 ## Conclusion
 
