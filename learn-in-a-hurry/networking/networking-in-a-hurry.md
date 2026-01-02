@@ -1,4 +1,12 @@
-# Networking in a Hurry: From ARP to Service Mesh (Q&A Format)
+---
+layout: post
+title: "Networking in a Hurry: From ARP to Service Mesh (Q&A Format)"
+categories: Learn in a hurry
+author:
+- Yuva Peavler
+modified_date: 2026-01-01
+---
+
 
 *Understanding modern cloud networking through the lens of envelopes, mailrooms, and postal services*
 
