@@ -7,11 +7,6 @@ author:
 modified_date: 2026-01-01
 ---
 
-
-*Understanding modern cloud networking through the lens of envelopes, mailrooms, and postal services*
-
----
-
 This guide covers networking technologies from the fundamentals to modern cloud-native networking, organized chronologically from basics to advanced concepts. You'll learn everything from the OSI model to Kubernetes networking, including ARP, NAT, VLANs, VXLAN, Geneve, and service mesh. The guide progresses from foundational concepts (OSI model, Layer 2/3/4) through container networking primitives, then covers network virtualization technologies (VLAN, VXLAN, Geneve) in order of their development, moves to application-layer routing (service mesh), and finally explores how these technologies work together in Kubernetes.
 
 <div class="video-wrapper" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 2em 0;">
@@ -19,7 +14,7 @@ This guide covers networking technologies from the fundamentals to modern cloud-
 </div>
 
 /// tip | Test Your Knowledge
-Ready to test your understanding? Take the **[Networking Quiz](networking-quiz.md)** — 34 questions covering everything from ARP to service mesh.
+Ready to test your understanding? Take the **[Networking Quiz](2026-01-01-networking-basics-quiz.md)** — 34 questions covering everything from ARP to service mesh.
 ///
 
 ---
