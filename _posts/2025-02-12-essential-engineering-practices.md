@@ -3,7 +3,6 @@ layout: post
 title: "10 Essential Engineering Practices for Junior Developers"
 ---
 
-## **Introduction**  
 Great software engineering is not just about writing code that works—it's about writing code that is clean, maintainable, and scalable. The best engineers develop **good habits** that make their code easier to read, debug, and extend over time.  
 
 For junior engineers (2-5 years of experience), adopting these best practices early will **save you countless hours of debugging and refactoring** later in your career. This post covers **10 essential engineering habits**, along with practical examples to help you apply them in real-world projects.  
