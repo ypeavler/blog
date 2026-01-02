@@ -7,17 +7,12 @@ author:
   name: ypeavler
   email: yuva.peavler@gmail.com
 description: >
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  Write something thoughtful here. 
 
 minima:
   hide_site_feed_link: true
   skin: dark
   date_format: "%b %-d, %Y"
-  social_links:
-    - { icon: "github", title: "Minima Theme repository at GitHub", url: "https://github.com/jekyll/minima" }
-    - { icon: "x-twitter", title: "Jekyll profile at X (formerly Twitter)", url: "https://x.com/jekyllrb" }
   show_excerpts: true
 
 # Build settings
