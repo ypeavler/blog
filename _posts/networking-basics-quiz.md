@@ -2,7 +2,7 @@
 layout: page
 ---
 
-# Networking in a Hurry: Quiz
+## Networking in a Hurry: Quiz
 
 Test your knowledge of networking fundamentals, from the OSI model to Kubernetes service mesh.
 
