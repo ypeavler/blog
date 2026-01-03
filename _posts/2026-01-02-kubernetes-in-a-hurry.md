@@ -16,8 +16,6 @@ Ready to test your understanding? Take the **[Networking Quiz](https://ypeavler.
 
 ## Part 1: Kubernetes Networking
 
-### The Kubernetes Networking Model
-
 <a id="what-are-the-three-fundamental-requirements-of-kubernetes-networking"></a>
 
 #### Q: What are the three fundamental requirements of Kubernetes networking?
