@@ -1138,5 +1138,18 @@ sequenceDiagram
 
 <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 <script>
-  mermaid.initialize({ startOnLoad: true });
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      'darkMode': true,
+      'background': '#1c2128',     // Main diagram canvas color
+      'primaryColor': '#2d333b',    // Node background
+      'primaryTextColor': '#adbac7',// Main text color
+      'primaryBorderColor': '#444c56',
+      'lineColor': '#444c56',
+      'secondaryColor': '#316dca',  // Accents for specific nodes
+      'tertiaryColor': '#1c2128'
+    }
+  });
 </script>
