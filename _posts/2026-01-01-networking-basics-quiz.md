@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: post
 title: Networking in a hurry - Quiz
 ---
 
