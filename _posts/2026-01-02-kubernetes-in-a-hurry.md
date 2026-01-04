@@ -22,41 +22,31 @@ Ready to test your understanding? Take the **[Networking Quiz](https://ypeavler.
 
 Kubernetes has a simple networking model with three fundamental requirements:
 
-1. **Every pod gets its own IP address** — No NAT between pods
-2. **Pods can communicate with all other pods** — Without NAT, across all nodes
-3. **Agents on a node can communicate with all pods** — Without NAT
+1. **Every pod gets its own IP address**
+2. **Pods can communicate with all other pods**: Without NAT
+3. **Node-to-Pod Communication**: All cluster Nodes must be able to communicate with all Pods without NAT
 
 This model is implemented by **CNI (Container Network Interface)** plugins.
 
 ---
 
-<a id="what-is-kube-proxy-and-what-are-its-modes"></a>
+<a id="whats-the-basic-connectivity-neeeded-to-run-k8s>
 
-#### Q: What is kube-proxy and what are its modes?
+#### Q: What are the basic connectivity requirements to run k8s?
 
-kube-proxy is a Kubernetes component that maintains network rules on each node, enabling Service abstraction. It has three modes:
-
-- **iptables mode** (default): Creates iptables rules for Service IP → Pod IP mapping. Fast and efficient, but rules can become large with many services.
-- **ipvs mode**: Uses Linux IPVS (IP Virtual Server) for load balancing. Better performance and scalability than iptables for large clusters.
-- **userspace mode** (deprecated): Proxy runs in userspace. Slower and rarely used.
-
+1.**Static IP Addresses**: All nodes must be assigned static IP addresses or DHCP reservations. Using dynamic IPs that change can break cluster communication and etcd quorum.
+2. **Full L2/L3 Connectivity**: Every node must have full network connectivity to every other node in the cluster. This can be over a private or public network, provided there is no NAT between nodes.
+3. **Unique Identifiers**: Each node must have a unique hostname, MAC address, and product_uuid (found in /sys/class/dmi/id/product_uuid)
+   
 ---
 
-<a id="can-you-show-an-example-of-how-kube-proxy-redirects-service-traffic"></a>
+<a id="whats-the-OS-requirement-needed-to-run-k8s>
 
-#### Q: Can you show an example of how kube-proxy redirects Service traffic?
+#### Q: What are the OS requirements requirements to run k8s?
 
-```bash
-# Service 10.96.0.100:80 → Pods 10.244.1.5:8080, 10.244.2.7:8080
-$ iptables -t nat -L KUBE-SERVICES
-Chain KUBE-SERVICES
-KUBE-SVC-XXX  tcp  --  anywhere  10.96.0.100  tcp dpt:80
-
-$ iptables -t nat -L KUBE-SVC-XXX
-Chain KUBE-SVC-XXX
-KUBE-SEP-AAA  all  --  anywhere  anywhere  statistic mode random probability 0.5
-KUBE-SEP-BBB  all  --  anywhere  anywhere  # remaining 50%
-```
+1. **Disable Swap**: Swap must be disabled on all nodes for the kubelet to function correctly.
+2. **Kernel Modules**: Ensure br_netfilter and overlay modules are loaded to allow bridged traffic to be processed by iptables.
+3. **Time Synchronization**: Highly accurate time sync (e.g., via Chrony or NTP) is required across all nodes to prevent certificate validation failures and etcd instability.
 
 ---
 
@@ -263,6 +253,36 @@ flowchart TB
 
 ---
 
+<a id="what-is-kube-proxy"></a>
+
+#### Q: What is kube-proxy?
+
+ Kube-proxy manages Service-to-Pod connectivity. It is a network proxy that runs on each node and maintains network rules (usually via iptables or IPVS) to map Kubernetes Service virtual IPs to the actual Pod IPs assigned by the CNI. It has three modes:
+
+- **iptables mode** (default): Creates iptables rules for Service IP → Pod IP mapping. Fast and efficient, but rules can become large with many services.
+- **ipvs mode**: Uses Linux IPVS (IP Virtual Server) for load balancing. Better performance and scalability than iptables for large clusters.
+- **userspace mode** (deprecated): Proxy runs in userspace. Slower and rarely used.
+
+---
+
+<a id="can-you-show-an-example-of-how-kube-proxy-redirects-service-traffic"></a>
+
+#### Q: Can you show an example of how kube-proxy redirects Service traffic?
+
+```bash
+# Service 10.96.0.100:80 → Pods 10.244.1.5:8080, 10.244.2.7:8080
+$ iptables -t nat -L KUBE-SERVICES
+Chain KUBE-SERVICES
+KUBE-SVC-XXX  tcp  --  anywhere  10.96.0.100  tcp dpt:80
+
+$ iptables -t nat -L KUBE-SVC-XXX
+Chain KUBE-SVC-XXX
+KUBE-SEP-AAA  all  --  anywhere  anywhere  statistic mode random probability 0.5
+KUBE-SEP-BBB  all  --  anywhere  anywhere  # remaining 50%
+```
+
+---
+
 <a id="why-do-we-need-endpoints"></a>
 
 #### Q: Why do we need Endpoints?
@@ -289,15 +309,6 @@ Endpoints solve a fundamental problem in Kubernetes: **Services have stable IPs,
 - kube-proxy watches the Endpoints resource (not individual pods)
 - When pods change, the Endpoints resource is updated automatically
 - kube-proxy gets notified of changes and updates its routing rules (iptables/IPVS)
-
-**The bridge:**
-
-Endpoints bridge the gap between:
-
-- **Services** (stable, logical abstraction: "the backend service")
-- **Pods** (ephemeral, physical reality: "these 5 pods with IPs 10.244.1.5, 10.244.2.10, ...")
-
-Think of it like a phone book: The Service is like a business name ("Acme Corp"), and Endpoints is the phone book that lists all current phone numbers (pod IPs) for that business. When employees (pods) come and go, the phone book (Endpoints) is updated automatically.
 
 <div class="mermaid">
 flowchart LR
@@ -331,37 +342,9 @@ flowchart LR
 
 ---
 
-<a id="what-are-endpoints-and-endpointslices"></a>
+<a id="what-are-endpointslices"></a>
 
-#### Q: What are Endpoints and EndpointSlices?
-
-Endpoints (and the newer EndpointSlices) are Kubernetes resources that track which pod IPs belong to a Service. They bridge the gap between Services (which have stable IPs) and Pods (which have ephemeral IPs).
-
-**Endpoints:**
-
-- A Kubernetes resource that lists all pod IPs and ports for a Service
-- Automatically created and updated by the Kubernetes control plane as pods matching the Service selector are created/destroyed
-- Each Service has one Endpoints resource (or none if no pods match)
-- Contains all pod IPs in a single resource, which can become large with many pods
-
-**Example Endpoints resource:**
-```yaml
-apiVersion: v1
-kind: Endpoints
-metadata:
-  name: backend  # Matches Service name
-subsets:
-- addresses:
-  - ip: 10.244.1.5
-    nodeName: node-1
-  - ip: 10.244.2.10
-    nodeName: node-2
-  ports:
-  - port: 8080
-    protocol: TCP
-```
-
-**EndpointSlices:**
+#### Q: What are EndpointSlices?
 
 - A newer, more scalable alternative to Endpoints (introduced in Kubernetes 1.16, GA in 1.21)
 - Splits endpoints across multiple slice resources (up to 100 endpoints per slice)
@@ -413,6 +396,22 @@ endpoints:
 
 ---
 
+<a id="what-is-coredns"></a>
+
+#### Q: What is CoreDNS?
+
+CoreDNS is the default DNS server in Kubernetes. It:
+
+- Runs as a Deployment in the `kube-system` namespace
+- Watches Kubernetes Services and Endpoints
+- Automatically creates DNS records for all Services
+- Resolves service names to Service IPs (ClusterIP)
+- Supports custom DNS entries via ConfigMaps
+
+When a pod queries `backend.default.svc.cluster.local`, CoreDNS returns the Service IP (e.g., 10.96.0.100), which kube-proxy then routes to an actual pod IP.
+
+---
+
 <a id="how-does-service-discovery-work-with-dns"></a>
 
 #### Q: How does service discovery work with DNS?
@@ -445,22 +444,6 @@ sequenceDiagram
 
 ---
 
-<a id="what-is-coredns"></a>
-
-#### Q: What is CoreDNS?
-
-CoreDNS is the default DNS server in Kubernetes. It:
-
-- Runs as a Deployment in the `kube-system` namespace
-- Watches Kubernetes Services and Endpoints
-- Automatically creates DNS records for all Services
-- Resolves service names to Service IPs (ClusterIP)
-- Supports custom DNS entries via ConfigMaps
-
-When a pod queries `backend.default.svc.cluster.local`, CoreDNS returns the Service IP (e.g., 10.96.0.100), which kube-proxy then routes to an actual pod IP.
-
----
-
 <a id="what-is-the-dns-naming-format"></a>
 
 #### Q: What is the DNS naming format?
@@ -469,13 +452,6 @@ When a pod queries `backend.default.svc.cluster.local`, CoreDNS returns the Serv
 - Short form: `<service>.<namespace>` or just `<service>` (same namespace)
 - Example: `backend.default.svc.cluster.local` → `10.96.0.100`
 
----
-
-<a id="can-you-walk-through-a-dns-service-discovery-flow"></a>
-
-#### Q: Can you walk through a DNS service discovery flow?
-
-The sequence diagram above shows the complete DNS service discovery flow. Applications query DNS using service names, CoreDNS resolves to ClusterIPs, and kube-proxy routes to pod IPs via overlay networks when needed.
 
 ---
 
@@ -516,6 +492,25 @@ sequenceDiagram
     IC->>LB: 200 OK
     LB->>User: 200 OK
 </div>
+
+---
+
+<a id="what-is-gateway-api"></a>
+
+#### Q: What is gateway api and how is it different from ingress controller?
+
+The API replaces the "one-size-fits-all" Ingress object with three distinct resources, each designed for a specific organizational role:
+**GatewayClass (Infrastructure Provider)**: A cluster-scoped resource that defines a specific type of load balancer or proxy implementation (e.g., an AWS NLB, NGINX, or Istio).
+**Gateway (Cluster Operator)**: An instantiation of a GatewayClass. It defines the actual entry point where traffic is received, including configuration for specific listeners (ports and protocols like HTTP, HTTPS, TCP, or UDP) and TLS termination.
+**HTTPRoute / GRPCRoute (App Developer)**: Resource-specific rules that define how traffic should be routed from a Gateway to backend Services based on hostnames, paths, or headers
+
+**Key Benefits over Ingress**:
+
+**Built-in Advanced Routing**: Natively supports features like header-based matching, traffic splitting (canary rollouts), and request mirroring without requiring custom, non-portable annotations.
+Broader Protocol Support: Beyond HTTP/HTTPS, it officially supports gRPC, TCP, UDP, and WebSockets.
+**Separation of Concern**s: Teams can manage their own routing rules (via HTTPRoute) independently from the shared infrastructure (via Gateway), reducing the risk of accidental misconfigurations across a cluster.
+**Portability**: As a standardized specification, configurations are portable between different vendors (e.g., from Envoy Gateway to Traefik) without needing to rewrite complex vendor-specific rules.
+Cross-Namespace Routing: Allows a single Gateway to route traffic to Services in different namespaces securely through the use of ReferenceGrant objects.
 
 ---
 
@@ -591,7 +586,6 @@ This policy says: "Only pods labeled `app: frontend` can talk to pods labeled `a
 | Enforcer | CNI dataplane (node) | Sidecar proxy (pod) |
 | Best for | Blast-radius limits between namespaces/tenants; default-deny | App-level allow/deny, mTLS, per-route rules |
 | Debug with | `kubectl get networkpolicies -A`, `cilium monitor`/`calicoctl` | Sidecar logs, `AuthorizationPolicy`/`ServerAuthorization` |
-
 
 
 <a id="what-is-the-kubernetes-networking-stack"></a>
@@ -784,6 +778,22 @@ A *service mesh* is a dedicated infrastructure layer that handles service-to-ser
 
 ---
 
+<a id="how-does-service-mesh-integrate-with-kubernetes-networking"></a>
+
+#### Q: How does service mesh integrate with Kubernetes networking?
+
+Service mesh works *on top of* Kubernetes networking, adding Layer 7 capabilities. The integration flow:
+
+1. App uses service name (`backend.default.svc.cluster.local` or just `backend`)
+2. Sidecar resolves via Kubernetes DNS → Service IP (10.96.0.100)
+3. Service discovery → Pod IP (10.244.2.10)
+4. Overlay network (VXLAN/Geneve) routes packet to destination pod
+5. Service mesh adds mTLS, observability, traffic management
+
+Service mesh leverages Kubernetes service discovery and DNS, then adds identity-based security, request-level observability, and traffic management on top of the existing pod-to-pod networking.
+
+---
+
 <a id="how-does-service-mesh-relate-to-overlay-networks"></a>
 
 #### Q: How does service mesh relate to overlay networks?
@@ -793,6 +803,17 @@ A *service mesh* is a dedicated infrastructure layer that handles service-to-ser
 > Service mesh works *on top of* overlay networks. You still need VXLAN/Geneve to route packets between hosts/containers at the infrastructure layer. Service mesh then adds Layer 7 routing and capabilities transparently to applications.
 
 While VLAN/VXLAN/Geneve are like the postal service that routes envelopes based on addresses (infrastructure layer), service mesh is like a **smart assistant who reads your letter and routes it based on what you wrote** (application layer). You write "Send this to the accounting department" (service name), and the assistant looks up which building and apartment that is, puts your letter in the right envelope (with security and tracking), and sends it. The assistant also adds a return envelope with your identity certificate, so the recipient knows it's really from you. The postal service (overlay network) still delivers the physical envelope, but the assistant (service mesh) handles the "who talks to whom" and "is this allowed" logic.
+
+---
+
+<a id="what-is-GAMMA?"></a>
+
+#### Q: What is GAMMA?
+
+**The GAMMA (Gateway API for Mesh Management and Administration)** routes internal (East-West) traffic by repurposing standard Gateway API Route objects (like HTTPRoute or GRPCRoute) but changing their Parent Reference.
+
+- **Graduation**: GAMMA's work for supporting service mesh use cases (East-West traffic) graduated to the Standard Channel (GA) starting with Gateway API v1.1.0 in early 2024.
+- **Core Feature**: The primary GAMMA feature—binding a Route (like HTTPRoute) directly to a Service as a parent—is fully stable and supported by major service meshes like Cilium, Istio, and Linkerd. 
 
 ---
 
@@ -897,27 +918,7 @@ Service meshes support three main identity models, each with different trade-off
 
 #### Q: Do I need service mesh?
 
-**Short answer: It depends.** Service mesh solves real problems, but it's not always the right solution. Here's a pragmatic guide:
-
-**You probably need service mesh if:**
-
-- You have **10+ microservices** communicating with each other
-- You need **zero-trust security** between services (mTLS everywhere)
-- You struggle with **observability**—can't trace requests across services, don't know which service is slow
-- You're implementing **canary deployments, A/B testing, or traffic splitting** and it's painful
-- You're writing the same **retry logic, circuit breakers, or TLS code** in every service
-- You have **multi-cloud or multi-cluster** deployments and need unified security/observability
-- You're **modernizing legacy apps** and can't change code but need security/observability
-
-**You probably don't need service mesh if:**
-
-- You have **1-3 services** (overkill—use simpler solutions)
-- You're running a **monolith or simple 2-tier app** (database + app)
-- Your services **don't talk to each other** (just frontend → backend → database)
-- You have **simple requirements** and existing tools work fine (API gateway, load balancer, basic monitoring)
-- Your team is **small** and can't invest in learning/maintaining service mesh
-- **Latency is critical** and you can't afford the 1-5ms overhead
-- You're in **early stages** and don't have the problems service mesh solves yet
+**Short answer: It depends.** Service mesh solves real problems, but it's not always the right solution.
 
 **The pragmatic approach:**
 1. **Start simple**: Use API gateways, load balancers, and basic monitoring first
@@ -929,25 +930,10 @@ Service meshes support three main identity models, each with different trade-off
 
 ---
 
-<a id="how-does-service-mesh-integrate-with-kubernetes-networking"></a>
 
-#### Q: How does service mesh integrate with Kubernetes networking?
+<a id="can-you-walk-through-an-example-of-frontend-calling-backend-using-identity"></a>
 
-Service mesh works *on top of* Kubernetes networking, adding Layer 7 capabilities. The integration flow:
-
-1. App uses service name (`backend.default.svc.cluster.local` or just `backend`)
-2. Sidecar resolves via Kubernetes DNS → Service IP (10.96.0.100)
-3. Service discovery → Pod IP (10.244.2.10)
-4. Overlay network (VXLAN/Geneve) routes packet to destination pod
-5. Service mesh adds mTLS, observability, traffic management
-
-Service mesh leverages Kubernetes service discovery and DNS, then adds identity-based security, request-level observability, and traffic management on top of the existing pod-to-pod networking.
-
----
-
-<a id="can-you-walk-through-an-example-of-frontend-calling-backend-through-the-mesh-in-kubernetes"></a>
-
-#### Q: Can you walk through an example of frontend calling backend through the mesh in Kubernetes?
+#### Q: Can you walk through an example of frontend calling backend using identity?
 
 This section details the **complete packet journey** in a Kubernetes cluster augmented with a service mesh, illustrating the interplay of all the components discussed so far. The diagram below shows the flow using SPIFFE identities for workload authentication:
 
@@ -1069,7 +1055,7 @@ Identity-based security rules are created as **Kubernetes Custom Resources** (CR
 
 <a id="what-is-the-complete-packet-flow-from-app-to-app-in-kubernetes-with-service-mesh"></a>
 
-#### Q: What is the complete packet flow from app to app in Kubernetes with service mesh?
+#### Q: What is the complete packet flow from app to app via overlay network in Kubernetes with service mesh?
 
 Here's the complete journey of a packet from one pod to another:
 
