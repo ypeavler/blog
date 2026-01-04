@@ -1062,44 +1062,25 @@ Here's the complete journey of a packet from one pod to another:
 <div class="mermaid">
 sequenceDiagram
     autonumber
-    participant AppA as AppA
-    participant SidecarA as SidecarA
-    participant Bridge1 as Bridge1
-    participant Overlay1 as Overlay1
-    participant Network as Network
-    participant Overlay2 as Overlay2
-    participant Bridge2 as Bridge2
-    participant SidecarB as SidecarB
-    participant AppB as AppB
+    participant AppA as App (Pod A)
+    participant EnvoyA as Envoy (Sidecar A)
+    participant KernelA as Linux Kernel (Node A)
+    participant Network as Physical Network (L3)
+    participant KernelB as Linux Kernel (Node B)
+    participant EnvoyB as Envoy (Sidecar B)
+    participant AppB as App (Pod B)
 
-    Note over AppA: App sends GET backend
-
-    AppA->>SidecarA: GET backend:8080
-
-    Note over SidecarA: Service discovery<br/>Initiate mTLS
-
-    SidecarA->>Bridge1: Encrypted packet
-
-    Note over Bridge1: Route lookup<br/>Encapsulate overlay
-
-    Bridge1->>Overlay1: Encapsulate<br/>Node1 → Node2
-
-    Overlay1->>Network: IP routing
-
-    Network->>Overlay2: Routed
-
-    Note over Overlay2: Decapsulate
-
-    Overlay2->>Bridge2: Packet
-
-    Bridge2->>SidecarB: Forward
-
-    Note over SidecarB: Verify identity<br/>Decrypt<br/>Check policies
-
-    SidecarB->>AppB: GET /api/data
-
-    AppB->>SidecarB: 200 OK
-    SidecarB->>AppA: Encrypted response
+    Note over AppA: Outbound request
+    AppA->>EnvoyA: Traffic intercepted
+    Note over EnvoyA: L7 Policy / mTLS
+    EnvoyA->>KernelA: Standard Packet
+    Note over KernelA: Encapsulate (VXLAN)<br/>NodeA_IP -> NodeB_IP
+    KernelA->>Network: UDP Encapsulated Packet
+    Network->>KernelB: Routed by Node IP
+    Note over KernelB: Decapsulate (VXLAN)
+    KernelB->>EnvoyB: Original Packet
+    Note over EnvoyB: Verify / Decrypt
+    EnvoyB->>AppB: Cleartext to App
 </div>
 
 ---
