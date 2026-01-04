@@ -30,7 +30,7 @@ This model is implemented by **CNI (Container Network Interface)** plugins.
 
 ---
 
-<a id="whats-the-basic-connectivity-neeeded-to-run-k8s>
+<a id="whats-the-basic-connectivity-neeeded-to-run-k8s">
 
 #### Q: What are the basic connectivity requirements to run k8s?
 
@@ -40,7 +40,7 @@ This model is implemented by **CNI (Container Network Interface)** plugins.
    
 ---
 
-<a id="whats-the-OS-requirement-needed-to-run-k8s>
+<a id="whats-the-OS-requirement-needed-to-run-k8s">
 
 #### Q: What are the OS requirements requirements to run k8s?
 
@@ -92,7 +92,7 @@ sequenceDiagram
 
 #### Q: What are popular CNI plugins?
 
-| CNI Plugin | Approach | Overlay Protocol | Key Features |
+   | CNI Plugin | Approach | Overlay Protocol | Key Features |
    |------------|----------|------------------|--------------|
    | **Cilium** | eBPF-based routing | Geneve, VXLAN, or native | Network policies, observability, service mesh integration |
    | **Calico** | BGP routing | VXLAN or native | Network policies, BGP integration |
