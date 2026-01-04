@@ -7,7 +7,7 @@ author:
   name: ypeavler
   email: yuva.peavler@gmail.com
 description: >
-  Write something thoughtful here. 
+  I write about what I am currently learning/experiencing. 
 
 minima:
   hide_site_feed_link: true
@@ -18,6 +18,9 @@ minima:
 # Build settings
 baseurl: /blog
 remote_theme: jekyll/minima
+
+plugins:
+  - jekyll-seo-tag
 
 sass:
   quiet_deps: true
