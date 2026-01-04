@@ -353,7 +353,6 @@ This rotates on a four-year cycle, ensuring that every team plays every other te
 #### Q: Why do teams meet more than once sometimes?
 Teams meet more than once if they are in the same division (play twice a year guaranteed) or if they meet in the playoffs after playing in the regular season. 
 
-
 #### Q: How is the tie record broken when ranking the teams with same record for playoffs
 The NFL uses a complex tie-breaking system to determine playoff seeding for teams with the same record. The criteria, in order, include:
 - Head-to-head record (if applicable).
@@ -372,6 +371,14 @@ The NFL uses a complex tie-breaking system to determine playoff seeding for team
 The higher-seeded team always hosts the game, ensuring home-field advantage. 
 Accomplishments
 
+#### Q: What is SNF, MNF, TNF?
+- Thursday Night Football
+- Sunday Night Footall
+- Monday Night Football
+
+#### Q: When there is games on Saturday, is it called SNF?
+No, "SNF" stands specifically for Sunday Night Football.
+The Saturday NFL games that occur late in the season or during the playoffs do not have a specific, common acronym like SNF or MNF (Monday Night Football). They are usually just referred to as the "Saturday game" or by the network airing them, such as "NFL Network Saturday" or "ESPN Saturday Night".
 
 ### Accolades
 
@@ -402,6 +409,27 @@ Season MVP
 This label is earned through factors like numerous All-Pro selections, significant career milestones (e.g., 10,000 rushing yards or 100 sacks), and a prolonged, dominant impact on the sport.
 
 It is a subjective term used by analysts to identify players expected to meet the high standards of the selection committee five years after they retire
+
+#### Q: What are the bowls in NFL?
+
+**The Bowls (Postseason Games)**
+
+The term "bowl" originates from the shape of stadiums, specifically the Rose Bowl. In the NFL, there are two main "bowl" events: 
+
+**Conference Championships**: These are the AFC and NFC Championship games held annually to determine the champions of each conference who will advance to the Super Bowl.
+
+**The Super Bowl**: This is the pinnacle of the NFL, the annual championship game played between the AFC and NFC champions to determine the league champion.
+The Pro Bowl: This is the NFL's all-star game, featuring top players from the AFC and NFC, typically played the week before the Super Bowl
+
+#### Q: What are the trophes that go with the bowls?
+
+**Vince Lombardi Trophy**: The most coveted team award, presented to the winner of the Super Bowl. A new sterling silver trophy is handcrafted by Tiffany & Co. each year for the winning team to keep permanently.
+
+**Lamar Hunt Trophy**: Awarded to the champion of the AFC (American Football Conference).
+
+**George Halas Trophy**: Awarded to the champion of the NFC (National Football Conference).
+
+**Pete Rozelle Trophy**: Presented to the Super Bowl Most Valuable Player (MVP).
 
 ### Analytics
 
@@ -469,3 +497,21 @@ Teams use different jerseys to distinguish themselves on the field (one team in 
 #### Q: What is 3 and out mean?
 
 "3 and out" means that the offensive team had possession of the ball but failed to get a first down after three plays, forcing them to punt on fourth down. 
+
+#### Q: Which teams have won most super bowls?
+New England Patriots and Pittsburgh Steelers have 6 wins.
+Dallas Cowboys and 	San Francisco 49ers have 5 wins each.
+
+#### Q: Whats the relationship between football and thanksgiving?
+
+The relationship between football and Thanksgiving is a deep-rooted American tradition that began with college football in 1876 and was later adopted by the NFL to popularize the league. The tradition was formalized by the Detroit Lions in 1934 and cemented by the Dallas Cowboys in 1966, both seeking national exposure. Today, the NFL hosts three Thanksgiving Day games annually, and the event has become a central cultural element of the holiday celebration.
+
+#### Q: Where did the "How 'bout them Cowboys?" came from?
+
+Following a crucial 30-20 win over the San Francisco 49ers, which secured the Cowboys a spot in the Super Bowl for the first time in over a decade, an excited Jimmy Johnson(HC) stood on a table to address his players. 
+In that moment, feeling overwhelmed with emotion and excitement for his team, he was momentarily stumped for words. He looked out at the cheering players and simply said: **"How 'bout them Cowboys?"**. 
+
+The locker room erupted in cheers, and those four words quickly became a popular, iconic rally cry that is still associated with the franchise and Johnson's legacy today. The phrase is a registered trademark owned by the Dallas Cowboys Football Club.
+
+#### Q: Who is John Madden?
+John Madden was a legendary figure in the NFL, achieving prominence both as a Super Bowl-winning head coach and as one of the most beloved and impactful sports broadcasters in television history.
