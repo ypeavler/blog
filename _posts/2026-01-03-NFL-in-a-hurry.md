@@ -6,7 +6,7 @@ author:
 - Yuva Peavler
 ---
 
-If you are like me that has gotten into this game that America loves late in your life, this cheetsheet is for you. I decided to put together all the questions that I asked (and hence annoyed) my partner, that one friend that is really into it , AI assistants and google. 
+If you are like me and got into America's favorite pastime late in life, this cheatsheet is for you. I decided to put together all the questions that I asked (and perhaps annoyed) my partner, that one friend who is really into the game, and AI assistants.
 
 
 ### What is American Football?
