@@ -5,8 +5,8 @@ author:
 - Yuva Peavler
 ---
 
-For PKI operations (Let's Encrypt, CSRs, internal PKI), see [PKI Operations in a Hurry](./2026-03-05-pki-operations-in-a-hurry.md).
-For how PKI is applied to workload identity, SPIFFE, and mTLS, see [Workload Identity in a Hurry](./2026-03-05-workload-identity-in-a-hurry.md).
+For PKI operations (Let's Encrypt, CSRs, internal PKI), see [PKI Operations in a Hurry]({{ site.baseurl }}{% post_url 2026-03-05-pki-operations-in-a-hurry %}).
+For how PKI is applied to workload identity, SPIFFE, and mTLS, see [Workload Identity in a Hurry]({{ site.baseurl }}{% post_url 2026-03-05-workload-identity-in-a-hurry %}).
 
 ---
 

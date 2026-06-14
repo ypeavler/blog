@@ -5,9 +5,9 @@ author:
 - Yuva Peavler
 ---
 
-If you need a networking primer before diving in, check out [Networking in a Hurry](./2026-01-01-networking-in-a-hurry.md).
-If you need a Kubernetes primer, check out [Kubernetes in a Hurry](./2026-01-02-kubernetes-in-a-hurry.md).
-If you need a PKI and TLS primer, check out [Cryptographic Basics in a Hurry](./2026-03-05-cryptographic-basics-in-a-hurry.md).
+If you need a networking primer before diving in, check out [Networking in a Hurry]({{ site.baseurl }}{% post_url 2026-01-01-networking-in-a-hurry %}).
+If you need a Kubernetes primer, check out [Kubernetes in a Hurry]({{ site.baseurl }}{% post_url 2026-01-02-kubernetes-in-a-hurry %}).
+If you need a PKI and TLS primer, check out [Cryptographic Basics in a Hurry]({{ site.baseurl }}{% post_url 2026-03-05-cryptographic-basics-in-a-hurry %}).
 
 
 /// note | Analogy key
@@ -57,7 +57,7 @@ A workload identity looks like this:
 spiffe://global.trust.example/platform/unix/workload/crowdstrike-agent
 ```
 
-That URI is the identity. The cryptographic proof of that identity is an X.509 certificate whose Subject Alternative Name contains that URI — for a refresher on X.509 certificates, certificate chains, and CAs, see [Cryptographic Basics in a Hurry](./2026-03-05-cryptographic-basics-in-a-hurry.md).
+That URI is the identity. The cryptographic proof of that identity is an X.509 certificate whose Subject Alternative Name contains that URI — for a refresher on X.509 certificates, certificate chains, and CAs, see [Cryptographic Basics in a Hurry]({{ site.baseurl }}{% post_url 2026-03-05-cryptographic-basics-in-a-hurry %}).
 
 ---
 
@@ -355,7 +355,7 @@ flowchart TD
 
 The root CA is kept air-gapped and never touches the network. It signs a long-lived policy intermediate. That policy intermediate signs short-lived issuing intermediates that are the only CAs actively online. If an issuing intermediate is compromised, revoke it and mint a new one from the policy intermediate — the root never has to come online.
 
-This is the pattern used by public CAs like DigiCert and Let's Encrypt. See [How SPIRE Gets Its Intermediate CA from Vault](../2026-03-05-workload-identity-deep-dives.md#how-spire-gets-its-intermediate-ca-from-vault) for how this plays out in practice with SPIRE and Vault.
+This is the pattern used by public CAs like DigiCert and Let's Encrypt. A future deep-dive post will cover how SPIRE gets its intermediate CA from Vault and how that pattern plays out in practice.
 
 ---
 
@@ -592,5 +592,5 @@ Using an existing passport from country A to get a visa stamp from country B's c
 ---
 
 *Continue reading:*
-- *[Workload Identity Deep Dives](../2026-03-05-workload-identity-deep-dives.md) — TPM bootstrap, service mesh, pod SVID lifecycle*
-- *[Deep Dives](./2026-03-05-workload-identity-deep-dives.md) — Vault CA, federation internals, Workload API, CSI driver*
+- *Future deep dives: TPM bootstrap, service mesh, pod SVID lifecycle*
+- *Future deep dives: Vault CA, federation internals, Workload API, CSI driver*

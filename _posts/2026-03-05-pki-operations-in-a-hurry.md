@@ -5,8 +5,8 @@ author:
 - Yuva Peavler
 ---
 
-For the cryptographic foundations (public key crypto, certificates, TLS), see [Cryptographic Basics in a Hurry](./2026-03-05-cryptographic-basics-in-a-hurry.md).
-For how PKI is applied to workload identity, SPIFFE, and mTLS, see [Workload Identity in a Hurry](./2026-03-05-workload-identity-in-a-hurry.md).
+For the cryptographic foundations (public key crypto, certificates, TLS), see [Cryptographic Basics in a Hurry]({{ site.baseurl }}{% post_url 2026-03-05-cryptographic-basics-in-a-hurry %}).
+For how PKI is applied to workload identity, SPIFFE, and mTLS, see [Workload Identity in a Hurry]({{ site.baseurl }}{% post_url 2026-03-05-workload-identity-in-a-hurry %}).
 
 ---
 

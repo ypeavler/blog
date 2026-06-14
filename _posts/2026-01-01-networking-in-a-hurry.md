@@ -14,7 +14,7 @@ This guide covers networking technologies from the fundamentals to modern cloud-
 </div>
 
 **Test Your Knowledge**
-Ready to test your understanding? Take the **[Networking Quiz](https://ypeavler.github.io/blog/2026/01/01/networking-basics-quiz.html)** — 34 questions covering everything from ARP to service mesh.
+Ready to test your understanding? Take the **[Networking Quiz]({{ site.baseurl }}{% post_url 2026-01-01-networking-basics-quiz %})** — 34 questions covering everything from ARP to service mesh.
 
 ---
 

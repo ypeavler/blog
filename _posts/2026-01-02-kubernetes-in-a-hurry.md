@@ -6,11 +6,10 @@ author:
 - Yuva Peavler
 ---
 
-If you need networking fundamentals primer before diving into container networking and kubernetes, check out [Part 1 of this series: Networking in a hurry](https://ypeavler.github.io/blog/learn/in/a/hurry/2026/01/01/networking-in-a-hurry.html)
-
+If you need networking fundamentals primer before diving into container networking and kubernetes, check out [Part 1 of this series: Networking in a hurry]({{ site.baseurl }}{% post_url 2026-01-01-networking-in-a-hurry %})
 
 **Test Your Knowledge**
-Ready to test your understanding? Take the **[Networking Quiz](https://ypeavler.github.io/blog/2026/01/01/networking-basics-quiz.html)** — 34 questions covering everything from ARP to service mesh.
+Ready to test your understanding? Take the **[Networking Quiz]({{ site.baseurl }}{% post_url 2026-01-01-networking-basics-quiz %})** — 34 questions covering everything from ARP to service mesh.
 
 ---
 

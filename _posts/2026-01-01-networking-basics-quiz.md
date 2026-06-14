@@ -293,4 +293,4 @@ if (document.readyState !== 'loading') render();
 
 ---
 
-*Based on [Networking in a Hurry: From ARP to Service Mesh](networking-in-a-hurry.md)*
+*Based on [Networking in a Hurry: From ARP to Service Mesh]({{ site.baseurl }}{% post_url 2026-01-01-networking-in-a-hurry %})*
