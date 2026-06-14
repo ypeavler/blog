@@ -3,6 +3,7 @@ title: "PKI Operations in a Hurry: Let's Encrypt, CSRs & Internal PKI"
 categories: Learn in a hurry
 author:
 - Yuva Peavler
+excerpt: "The operational side of PKI - generating CSRs, automating certificates with Let's Encrypt and ACME, running internal CAs, and managing certificate lifecycle at scale."
 ---
 
 For the cryptographic foundations (public key crypto, certificates, TLS), see [Cryptographic Basics in a Hurry]({{ site.baseurl }}{% post_url 2026-03-05-cryptographic-basics-in-a-hurry %}).
@@ -41,7 +42,7 @@ PKI answers one fundamental question: **how do you know the public key received 
 
 Asymmetric encryption was a breakthrough, but it introduced a new problem: the **man-in-the-middle attack**.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant A as Alice
@@ -55,7 +56,7 @@ sequenceDiagram
     Note over M: Decrypts, reads, re-encrypts with Bob's real key
     M->>B: Forwards re-encrypted message
     Note over A,B: Neither Alice nor Bob knows Mallory is in the middle
-```
+</div>
 
 Alice thinks she's communicating securely with Bob. She is — but with Mallory, not Bob.
 
@@ -109,7 +110,7 @@ The pattern: each wave multiplied the number of certificates by orders of magnit
 
 PKI operations is the day-to-day work of keeping certificates healthy across their full lifecycle:
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
     A["🔑 Issue\nGenerate keypair\nSubmit CSR\nCA verifies identity\nSigns and returns cert"]
@@ -123,7 +124,7 @@ flowchart LR
     A --> D
     D --> E
     E --> B
-```
+</div>
 
 The hardest part is not issuing certificates — it's renewing them before they expire, revoking them when keys are compromised, and knowing where all certificates are. Certificate expiry outages are common and entirely avoidable; they happen when the monitoring and renewal process breaks down.
 
@@ -135,7 +136,7 @@ The hardest part is not issuing certificates — it's renewing them before they 
 
 Let's Encrypt uses the ACME protocol (Automated Certificate Management Environment) to issue certificates without human involvement.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant S as Your Server
@@ -148,7 +149,7 @@ sequenceDiagram
     LE->>S: Verify challenge ✓
     LE->>S: Return signed certificate (90-day TTL)
     Note over S: ACME client (certbot, cert-manager, Caddy)<br/>handles renewal automatically
-```
+</div>
 
 The 90-day TTL is intentional — it forces automation and limits the blast radius of a compromised cert. Let's Encrypt issues ~5 million certificates per day.
 
@@ -175,7 +176,7 @@ The private key never leaves the server. The CA never sees it. The CA is vouchin
 
 At small scale, manual cert management works. At any real scale, it becomes the leading cause of unplanned outages.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     I["Engineer manually requests cert\nfrom CA portal"]
@@ -185,7 +186,7 @@ flowchart TD
     P["Post-mortem:\n'We need to track our certs better'"]
 
     I --> S --> E --> O --> P --> I
-```
+</div>
 
 This is not hypothetical. Some of the largest outages — and breaches — in recent years were caused by expired certificates:
 - **Microsoft Teams (2020)** — an expired authentication cert took Teams offline for hours
@@ -213,7 +214,7 @@ Research from Keyfactor and the Ponemon Institute found organizations have an av
 
 HashiCorp Vault is a secrets management platform with a built-in PKI engine. It can act as a CA — issuing, signing, and revoking certificates — while also storing and controlling access to other secrets (API keys, database passwords, etc.).
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     R["Vault Root CA\n(or an imported external root)"]
@@ -224,7 +225,7 @@ flowchart TD
     R -- "signs" --> I
     W -- "POST /pki/issue/{role}" --> I
     I -- "returns" --> C
-```
+</div>
 
 | Capability | What it means |
 |---|---|
@@ -242,7 +243,7 @@ flowchart TD
 
 cert-manager is a Kubernetes-native certificate manager — a controller that automates the full certificate lifecycle for workloads running in Kubernetes: requesting, renewing, and rotating certificates without human intervention.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
     D["Developer\nDefines a Certificate resource\nin Kubernetes YAML"]
@@ -257,7 +258,7 @@ flowchart LR
     CM -- "stores in" --> S
     S -- "mounted into" --> W
     CM -- "renews automatically\nbefore expiry" --> I
-```
+</div>
 
 Declare what's needed — cert-manager handles the rest:
 
@@ -329,7 +330,7 @@ Public internet PKI (DigiCert, Let's Encrypt) solves the problem of strangers tr
 
 The mechanics are identical — root CA, intermediate CA, leaf certs, chain verification — but the organization owns and operates the entire chain:
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     subgraph Public["Public Internet PKI"]
@@ -345,7 +346,7 @@ flowchart TD
         IL["Service leaf cert\n(valid for 24h or less)"]
         IR -- "signs" --> II -- "signs" --> IL
     end
-```
+</div>
 
 **What's needed to run internal PKI:**
 
@@ -373,7 +374,7 @@ In a Kubernetes environment, these tools divide the work:
 
 A PKI **tier** is a level in the CA hierarchy. The number of tiers determines how many intermediate CAs sit between the root CA and leaf certificates.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     subgraph T1["1-Tier (avoid)"]
@@ -396,7 +397,7 @@ flowchart TD
         L3["Leaf certs"]
         R3 -- "signs" --> P3 -- "signs" --> I3 -- "signs" --> L3
     end
-```
+</div>
 
 The more degrees of separation between the root CA and leaf certs, the smaller the blast radius if a CA is compromised. If an issuing CA's key is compromised, only the certs it issued need to be revoked. If the root CA's key is compromised, every cert ever issued from that root must be revoked — a full PKI rebuild.
 
@@ -441,7 +442,7 @@ A **trust anchor** is the certificate trusted unconditionally — without needin
 
 In practice, the trust anchor is always a **root CA certificate**. When a verifier walks a certificate chain, it keeps checking signatures upward until it reaches a cert already in its trust store.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     R["Root CA cert\n✓ In trust store\n→ Trust anchor: accepted unconditionally"]
@@ -450,7 +451,7 @@ flowchart TD
 
     L -- "verified by" --> I -- "verified by" --> R
     R -- "trusted because\nit's in the trust store" --> T["✓ Chain valid"]
-```
+</div>
 
 **Trust anchors are not verified — they are chosen.** There is no verification of a root CA's certificate against anything; it's a deliberate decision to include it in the trust store. This is why:
 - Browsers ship with ~150 pre-trusted root CAs (Mozilla, Apple, Microsoft each maintain their own list)
@@ -485,7 +486,7 @@ Signing artifacts doesn't prevent all of these — SolarWinds' signing key was l
 
 Code signing uses the same asymmetric signing mechanism as TLS certificates — a private key signs a hash of the artifact, and anyone with the corresponding public key (embedded in a certificate) can verify it.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant D as Developer / CI Pipeline
@@ -500,7 +501,7 @@ sequenceDiagram
     Note over U: Verify signature using cert's public key
     Note over U: Check cert chains to trusted CA
     Note over U: ✓ Artifact is from this publisher and unmodified
-```
+</div>
 
 | Artifact | What signing proves |
 |---|---|
@@ -521,7 +522,7 @@ Traditional code signing has a key management problem: every developer and CI pi
 
 **Sigstore** solves this with **keyless signing** — no long-lived keys, no key management, no revocation problem.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     CI["CI Pipeline\n(GitHub Actions, etc.)"]
@@ -535,7 +536,7 @@ flowchart TD
     CI -- "signs artifact with ephemeral key" --> Sig
     Sig -- "logged in" --> Rekor
     Cert -- "embedded in" --> Sig
-```
+</div>
 
 1. The CI pipeline authenticates to Fulcio using an OIDC token — proving "I am this specific workflow in this specific repo"
 2. Fulcio issues a **short-lived certificate** (~10 minutes) binding the ephemeral public key to that OIDC identity
@@ -554,7 +555,7 @@ A container image tag (`myapp:latest`) is mutable — it can be overwritten to p
 
 **Without signing — the attack:**
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
     B["CI builds\nmyapp:v1.2.3\n(legitimate)"]
@@ -565,11 +566,11 @@ flowchart LR
     B --> R
     A --> R
     R --> K
-```
+</div>
 
 **With image signing + admission control:**
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
     B["CI builds + signs\nmyapp:v1.2.3"]
@@ -578,7 +579,7 @@ flowchart LR
     D["Deploy ✓ or reject ✗"]
 
     B --> R --> K --> D
-```
+</div>
 
 | Tool | What it does |
 |---|---|
@@ -681,7 +682,7 @@ A CBOM is the prerequisite for **crypto-agility** — the ability to swap out a 
 
 #### Q: How do you build and maintain a CBOM?
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     D["Discover\nScan infrastructure for crypto assets:\ncerts, keys, TLS configs, cipher suites,\ncrypto library versions"]
@@ -691,7 +692,7 @@ flowchart TD
     M["Monitor\nContinuous scanning — new services\nappear, certs expire, CVEs are published"]
 
     D --> I --> A --> R --> M --> D
-```
+</div>
 
 | Source | What it reveals |
 |---|---|
@@ -707,3 +708,23 @@ SPIFFE/SPIRE deployments have a natural CBOM advantage: all workload certs are i
 ---
 
 *More questions coming as we explore. Ask away.*
+
+---
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      'darkMode': true,
+      'background': '#1c2128',
+      'primaryColor': '#2d333b',
+      'primaryTextColor': '#adbac7',
+      'primaryBorderColor': '#444c56',
+      'lineColor': '#444c56',
+      'secondaryColor': '#316dca',
+      'tertiaryColor': '#1c2128'
+    }
+  });
+</script>

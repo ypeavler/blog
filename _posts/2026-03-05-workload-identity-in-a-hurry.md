@@ -3,6 +3,7 @@ title: "Workload Identity in a Hurry: SPIFFE, SPIRE & TPM"
 categories: Learn in a hurry
 author:
 - Yuva Peavler
+excerpt: "How machines prove their identity without passwords. Covers SPIFFE IDs, SPIRE architecture, X.509 SVIDs, mTLS between workloads, and TPM-based attestation."
 ---
 
 If you need a networking primer before diving in, check out [Networking in a Hurry]({{ site.baseurl }}{% post_url 2026-01-01-networking-in-a-hurry %}).
@@ -10,11 +11,12 @@ If you need a Kubernetes primer, check out [Kubernetes in a Hurry]({{ site.baseu
 If you need a PKI and TLS primer, check out [Cryptographic Basics in a Hurry]({{ site.baseurl }}{% post_url 2026-03-05-cryptographic-basics-in-a-hurry %}).
 
 
-/// note | Analogy key
-Throughout this post a consistent **passport/border control** analogy is used.
+> **Analogy key**
+>
+> Throughout this post, a consistent **passport/border control** analogy is used.
 
 | Concept | Analogy |
-|---|---|
+| --- | --- |
 | Trust domain | A country |
 | SPIFFE ID | Passport number |
 | SVID (X.509 cert) | The passport booklet |
@@ -26,8 +28,7 @@ Throughout this post a consistent **passport/border control** analogy is used.
 | SPIRE Agent | The border control officer at the gate |
 | Node attestation | Proving citizenship to get a first passport |
 | Workload attestation | The border officer checking face, fingerprints, and visa |
-| Federation | A bilateral agreement — country A agrees to accept country B's passports |
-///
+| Federation | A bilateral agreement - country A agrees to accept country B's passports |
 
 ---
 
@@ -76,7 +77,7 @@ In SPIFFE/SPIRE this happens at two levels:
 
 **Workload attestation** — when a workload calls the SPIRE agent's local socket to request an SVID, the agent interrogates the kernel: what is the PID of this caller? What namespace, service account, or binary is it running as? These kernel-visible facts are the workload's attestation evidence. The agent matches them against registered selectors and, if they match, issues the SVID. The workload never presented a password — the agent observed it.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     A["Machine boots"] --> B["SPIRE agent presents TPM proof\nto SPIRE server"]
@@ -84,7 +85,7 @@ flowchart TD
     C --> D["Workload calls agent socket"]
     D --> E["Agent checks kernel:\n'who is this process?'"]
     E -->|"workload attestation"| F["Agent issues workload SVID"]
-```
+</div>
 
 This is why attestation-based identity solves the secret zero problem: there is no first secret to protect. The identity is earned from evidence that already exists in the environment.
 
@@ -228,7 +229,7 @@ mTLS (mutual TLS) is TLS where **both sides** present and verify certificates.
 
 Standard TLS is like showing a passport at a hotel check-in — only one party proves who they are. mTLS is two diplomats meeting — both show their passports, both verify the other's seal before talking.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant A as service-A
@@ -241,7 +242,7 @@ sequenceDiagram
     B->>A: Finished (encrypted)
     A->>B: Encrypted application data
     B->>A: Encrypted application data
-```
+</div>
 
 After the handshake, both sides have verified the other's identity, established a shared encryption key, and have a fully encrypted channel.
 
@@ -297,7 +298,7 @@ No — they solve different problems and are commonly used together in the same 
 
 **Vault sits behind both.** cert-manager uses Vault as an issuer to get certs signed by the internal CA. SPIRE uses Vault's PKI engine to obtain its intermediate CA certificate at startup.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     V["Vault\n(Root CA + PKI engine)"]
@@ -310,7 +311,7 @@ flowchart TD
     V -- "issues certs via vault-issuer" --> CM
     CM -- "manages" --> ING
     SP -- "issues" --> SVID
-```
+</div>
 
 Running SPIRE for mTLS still requires cert-manager for ingress TLS, webhook TLS, and any other Kubernetes infrastructure that needs certificates.
 
@@ -342,7 +343,7 @@ The chain can be arbitrarily deep — the verifier keeps walking upward until it
 
 The most common reason to add a second intermediate is the **online/offline split**:
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     R["Root CA\n(air-gapped, touched once a year)"]
@@ -351,7 +352,7 @@ flowchart TD
     L["Leaf certs"]
 
     R -- "signs" --> P -- "signs" --> I -- "signs" --> L
-```
+</div>
 
 The root CA is kept air-gapped and never touches the network. It signs a long-lived policy intermediate. That policy intermediate signs short-lived issuing intermediates that are the only CAs actively online. If an issuing intermediate is compromised, revoke it and mint a new one from the policy intermediate — the root never has to come online.
 
@@ -373,7 +374,7 @@ SPIRE has one **centralized server** per trust domain and one **distributed agen
 
 **The agents are distributed** — one per node — because workload attestation must happen locally. The agent inspects the calling process (PID, UID, binary hash, cgroup) using OS kernel APIs. That inspection only works on the same machine as the workload.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 graph TD
     S["SPIRE Server\n(one per trust domain)\n─────────────────\n● CA — signs SVIDs\n● Registration entry DB\n● Node attestation verifier"]
@@ -385,7 +386,7 @@ graph TD
     S -->|"mTLS (agent uses its node SVID)"| A1
     S -->|"mTLS (agent uses its node SVID)"| A2
     S -->|"mTLS (agent uses its node SVID)"| A3
-```
+</div>
 
 The agent acts as a **local proxy and cache**. Once attested and with registration entries received from the server, it can issue SVIDs to local workloads without a server round-trip on every request. The server is only in the critical path for the agent's own bootstrap, periodic node SVID renewal, and when registration entries change.
 
@@ -555,7 +556,7 @@ service-A's trust bundle contains only `global.trust.example root CA`. The chain
 
 The handshake fails. service-A never even sends its own certificate. The failure is symmetric — even if service-A got past step 1, service-B would face the same problem in the other direction.
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
     subgraph no ["Without federation"]
@@ -573,7 +574,7 @@ flowchart LR
         bB2 -->|"presents prod.trust.example leaf\n→ root CA IS in service-A bundle"| Y1["✅ ACCEPTED"]
         bA2 -->|"presents global.trust.example leaf\n→ root CA IS in service-B bundle"| Y2["✅ ACCEPTED"]
     end
-```
+</div>
 
 service-A arrives at the border of country Prod. The border officer opens the reference book. Country Global is not in it. service-A is turned away — not because the passport is fake, but because country Prod has never agreed to accept it. Federation is the bilateral agreement that gets country Global added to the book.
 
@@ -594,3 +595,23 @@ Using an existing passport from country A to get a visa stamp from country B's c
 *Continue reading:*
 - *Future deep dives: TPM bootstrap, service mesh, pod SVID lifecycle*
 - *Future deep dives: Vault CA, federation internals, Workload API, CSI driver*
+
+---
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      'darkMode': true,
+      'background': '#1c2128',
+      'primaryColor': '#2d333b',
+      'primaryTextColor': '#adbac7',
+      'primaryBorderColor': '#444c56',
+      'lineColor': '#444c56',
+      'secondaryColor': '#316dca',
+      'tertiaryColor': '#1c2128'
+    }
+  });
+</script>

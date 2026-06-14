@@ -3,6 +3,7 @@ title: "Cryptographic Basics in a Hurry: Public Key Cryptography, Certificates &
 categories: Learn in a hurry
 author:
 - Yuva Peavler
+excerpt: "Symmetric vs asymmetric encryption, how certificates and certificate chains work, and the full TLS handshake - everything you need before diving into PKI or workload identity."
 ---
 
 For PKI operations (Let's Encrypt, CSRs, internal PKI), see [PKI Operations in a Hurry]({{ site.baseurl }}{% post_url 2026-03-05-pki-operations-in-a-hurry %}).
@@ -159,7 +160,7 @@ Diffie-Hellman (DH) is a **key agreement protocol** — two parties independentl
 
 The paint-mixing analogy:
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant E as Eavesdropper 👁
@@ -177,7 +178,7 @@ sequenceDiagram
     Note over B: orange + secret blue = 🟤 brown
 
     Note over A,B: Both arrive at 🟤 brown — without ever sending red or blue
-```
+</div>
 
 In TLS, the shared secret becomes the seed for the AES session key.
 
@@ -219,7 +220,7 @@ The DH output is a large random number — not an AES key. It's the wrong size, 
 
 **HKDF** (HMAC-based Key Derivation Function) solves this using SHA internally:
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     DH["DH Shared Secret\n(large random number)"]
@@ -233,7 +234,7 @@ flowchart TD
     EXP --> CK
     EXP --> SK
     EXP --> IV
-```
+</div>
 
 Two separate AES keys — one per direction — so client→server and server→client are encrypted independently. The `SHA384` in `TLS_AES_256_GCM_SHA384` is the hash HKDF uses for this.
 
@@ -440,7 +441,7 @@ The reason wildcards became popular was operational convenience — one cert to 
 
 #### Q: How does a certificate actually get created?
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant A as Applicant
@@ -453,7 +454,7 @@ sequenceDiagram
     Note over CA: Sign public key + identity with CA's private key<br/>→ this is the certificate
     CA->>A: Return signed certificate
     Note over A: Private key stays here.<br/>CA never saw it.
-```
+</div>
 
 The CA never sees the private key. It is only vouching for the binding between the applicant's public key and their identity.
 
@@ -488,7 +489,7 @@ To see a system's trusted roots:
 
 #### Q: What is the difference between a root CA, intermediate CA, and leaf certificate?
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     R["🔒 Root CA Certificate
@@ -514,7 +515,7 @@ flowchart TD
 
     R -- "signs" --> I
     I -- "signs" --> L
-```
+</div>
 
 The root CA's private key is the most valuable thing in the PKI. If compromised, every certificate ever issued by that CA is untrustworthy — and there is no way to revoke a root certificate. The organization must publicly disclose the breach and the root must be removed from all trust stores, which is catastrophic.
 
@@ -533,7 +534,7 @@ The root CA's private key is the most valuable thing in the PKI. If compromised,
 
 When a browser connects to `https://bank.com`, it receives the leaf certificate and any intermediate CA certificates, then walks the chain recursively:
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 flowchart TD
     A["Receive leaf cert for bank.com\nSigned by: Let's Encrypt R11"]
@@ -542,7 +543,7 @@ flowchart TD
     D["Root X1 is in trust store → TRUSTED ✓"]
 
     A --> B --> C --> D
-```
+</div>
 
 At each step:
 1. Is the signature on this cert valid?
@@ -614,7 +615,7 @@ Downside: if the certificate is rotated, all clients must be updated simultaneou
 
 The TLS 1.3 handshake, annotated to show where signing and encryption each appear:
 
-```mermaid
+<div class="mermaid">
 %%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant C as Client
@@ -638,7 +639,7 @@ sequenceDiagram
     C->>S: Encrypted application data (AES-GCM, session key)
     S->>C: Encrypted application data (AES-GCM, session key)
     Note over C,S: → CONFIDENTIALITY
-```
+</div>
 
 What each step does:
 
@@ -722,3 +723,23 @@ With HSTS: the browser refuses to make the HTTP request at all after the first H
 ---
 
 *More questions coming as we explore. Ask away.*
+
+---
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      'darkMode': true,
+      'background': '#1c2128',
+      'primaryColor': '#2d333b',
+      'primaryTextColor': '#adbac7',
+      'primaryBorderColor': '#444c56',
+      'lineColor': '#444c56',
+      'secondaryColor': '#316dca',
+      'tertiaryColor': '#1c2128'
+    }
+  });
+</script>
