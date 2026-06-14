@@ -1,250 +1,441 @@
-# Kubernetes Lab with kubeadm and Lima VMs
+# Kubernetes Lab with kubeadm and Lima on macOS
 
-I will walk you through my thought process and steps to create a simple kubernetes cluster in your mac. This can be used for learning and also to create a local test environment. I currently use a similar setup to test my production ansible scripts. 
+This post walks through a local Kubernetes lab that runs on Lima VMs on
+macOS. The goal is to get a
+small environment that feels closer to a real kubeadm-based cluster.
 
-## What You'll Build
+This setup is useful for learning, testing cluster bootstrap steps, and
+validating infrastructure automation before it is pointed at anything more
+important.
 
-A complete Kubernetes cluster with:
-- 1 Control Plane node (k8s-control-plane)
-- 2 Worker nodes (k8s-worker1, k8s-worker2)
-- Cilium networking (replaces kube-proxy)
-- Prometheus + Grafana monitoring
+## What We'll Build
+
+A small Kubernetes lab with:
+
+- 1 control plane node: `k8s-control-plane`
+- 2 worker nodes: `k8s-worker1` and `k8s-worker2`
+- kubeadm for cluster bootstrap
+- Cilium as the CNI, with `kube-proxy` disabled
+- Optional Prometheus and Grafana monitoring
+
+## Why Lima
+
+For this kind of lab, full Linux VMs are more useful than containers
+pretending to be nodes. Lima is a good fit on macOS because it is
+lightweight, can be automated and easy to setup and tear down.
+
+That matters when we want to:
+
+- Practice kubeadm workflows
+- Test kernel and networking settings
+- Validate CNI behavior
+- Repeat cluster bootstrap from scratch
+
+## Example Repo
+
+The repo for this lab is [the lima-k8s repository](https://github.com/ypeavler/lima-k8s):
+
+- `1-k8s.yaml` - the Lima VM template
+- `2-install-deps.sh` - installs Kubernetes packages and CRI tooling
+- `3-cluster-init.sh` - runs `kubeadm init` with a generated config
+- `3b-join-worker-nodes.sh` - installs worker dependencies and joins workers
+- `4-cilium.sh` - installs Cilium with Helm
+- `5-monitoring.sh` - enables Prometheus and Grafana-related monitoring bits
+- `Makefile` - convenience targets for creating and cleaning up VMs
 
 ## Prerequisites
 
-- macOS with Lima installed
-- 8GB+ RAM available
-- 20GB+ disk space
-- Internet connection
+- macOS
+- Lima installed and working
+- Apple Silicon if you plan to use the current `aarch64` template as-is
+- at least 8 GiB of free RAM for the lab
+- enough free disk for 3 VMs and container images
+- internet access from the VMs
 
-## Step-by-Step Guide
+## Step 0: Review the Lima Template
 
-### **Step 1: Create VMs**
-Inorder to make the lcoal k8s cluster resemble a prodcution cluster as closely as possible, I needed to use VMs. When looking for VM creation in mac, UTM and Lima are my top two contenders.
-I decided to use [Lima](https://github.com/lima-vm/lima), a lightweight virtual machine manager for macOS. I only needed to run linux on the VMs and lima was simple enough to use.
+We use a single `k8s.yaml` file at the repo root. This file is
+used for each VM.
 
-#### Why `user-v2` Networking?
+At a high level, the template does four things:
 
-We use the `user-v2` networking mode in Lima because it provides a simple and reliable way to enable network connectivity for the VMs. This mode allows the VMs to access the internet and communicate with each other without requiring complex network configurations or administrative privileges. It also avoids potential conflicts with macOS's native networking stack.
+1. Picks an Ubuntu image and VM type
+2. Configures CPU, memory, disk, and mounts
+3. Enables Lima networking and NodePort forwarding
+4. Prepares the guest kernel and sysctls for Kubernetes networking
 
-#### Networking Changes for Kubernetes Compatibility
-
-To ensure the VMs are compatible with Kubernetes, we need to make the following networking changes:
-1. Enable the `br_netfilter` kernel module to allow bridge traffic to be visible to iptables.
-2. Configure sysctl settings to allow IP forwarding and proper handling of bridged traffic.
-
-These changes are necessary because Kubernetes relies on container networking interfaces (CNI) to manage pod-to-pod communication and service discovery.
-
-#### Steps to Create VMs Using Lima Templates
-
-Instead of using a Makefile, we will directly use a Lima configuration file (`k8s.yaml`) to define and create our VMs. Below is an example of the `k8s.yaml` configuration file:
+### VM type and architecture
 
 ```yaml
-# k8s.yaml
-images:
-  - location: "https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img"
-    arch: "x86_64"
-
-cpus: 2
-memory: "4GiB"
-disk: "20GiB"
-
-mounts:
-  - location: "~"
-    writable: false
-  - location: "/tmp/lima"
-    writable: true
-
-network:
-  - lima: "shared"
-    socket: "user-v2"
-
-provision:
-  - mode: system
-    script: |
-      #!/bin/bash
-      sudo modprobe br_netfilter
-      echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-      echo 1 | sudo tee /proc/sys/net/ipv4/conf/all/forwarding
-      echo 1 | sudo tee /proc/sys/net/bridge/bridge-nf-call-iptables
-      echo 1 | sudo tee /proc/sys/net/bridge/bridge-nf-call-ip6tables
+vmType: vz
+arch: "aarch64"
 ```
 
-To create the VMs, follow these steps:
+That makes sense for Apple Silicon Macs. `vz` uses Apple Virtualization
+Framework support, and `aarch64` matches the current Ubuntu ARM image in the
+repo.
 
-1. Save the above configuration as `k8s.yaml` in your working directory.
-2. Create the VMs using the following command:
-   ```bash
-   limactl start --name=k8s-control-plane k8s.yaml
-   limactl start --name=k8s-worker1 k8s.yaml
-   limactl start --name=k8s-worker2 k8s.yaml
-   ```
+### Resource settings
 
-This will create three VMs: `k8s-control-plane`, `k8s-worker1`, and `k8s-worker2`, each configured with the specified resources and networking settings.
+```yaml
+cpus: 2
+memory: "2GiB"
+disk: "8GiB"
+```
 
-### **Step 2: Initialize Control Plane**
+That is enough for a lab, but it is still tight. If you add more workloads,
+monitoring, or heavier test apps, expect to increase memory and disk.
 
-Once the VMs are created, we need to initialize the control plane node. This involves setting up the Kubernetes control plane components and configuring the cluster.
+### Networking
 
-#### Steps to Initialize the Control Plane
+```yaml
+networks:
+- lima: user-v2
+```
 
-1. Access the control plane VM:
-   ```bash
-   limactl shell k8s-control-plane
-   ```
+For this lab, `user-v2` is a good default because it gives the VMs outbound
+network access and lets the nodes talk to each other without requiring more
+complicated host network setup.
 
-2. Copy the required certificates to the appropriate locations:
-   ```bash
-   sudo cp /path/to/certs/* /etc/kubernetes/pki/
-   ```
+The template also forwards the Kubernetes NodePort range:
 
-3. Install necessary dependencies, such as `kubeadm`, `kubelet`, and `kubectl`:
-   ```bash
-   sudo apt-get update
-   sudo apt-get install -y kubeadm kubelet kubectl
-   ```
+```yaml
+portForwards:
+- guestPortRange: [30000, 32767]
+  hostPortRange: [30000, 32767]
+  hostIP: "0.0.0.0"
+```
 
-4. Initialize the Kubernetes control plane:
-   ```bash
-   sudo kubeadm init --pod-network-cidr=10.244.0.0/16
-   ```
+That makes it easier to test `NodePort` services from the Mac host.
 
-### **Step 3: Configure kubectl**
+### Why the provisioning section matters
+
+The `provision` block in `k8s.yaml` intentionally stays small. It handles
+local guest preparation only:
+
+- loads `overlay` and `br_netfilter`
+- loads IPVS-related modules
+- writes persistent module configuration under `/etc/modules-load.d`
+- enables required sysctls for bridged traffic and IP forwarding
+
+## Step 1: Create the VMs
+
+From the repo root on the Mac, create the VMs with the Makefile:
+
 ```bash
-# Still on the control plane VM
-mkdir $HOME/.kube
-sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-export KUBECONFIG=$HOME/.kube/config
+make create-single-cp-cluster
+```
 
-# Copy kubeconfig to your Mac
-# (Open new terminal on Mac)
-limactl cp k8s-control-plane:.kube/config ~/.kube/config.k8s-on-macos
+That target creates and starts the following lima vms:
+
+- `k8s-control-plane`
+- `k8s-worker1`
+- `k8s-worker2`
+
+Check if the VMs exist:
+
+```bash
+limactl list
+```
+
+The Makefile also prints the IPs for the three lab VMs after startup.
+
+## Step 2: Install Kubernetes Dependencies on the Control Plane
+
+The preferred interface is the host-side Make target:
+
+```bash
+make install-dependencies
+```
+
+That target shells into the control-plane VM and runs the dependency install
+flow there. The lower-level guest-side commands are still described below for
+readers who want to understand what the automation is doing.
+
+This script installs:
+
+- `cri-tools`
+- `kubernetes-cni`
+- `kubelet`
+- `kubeadm`
+- `kubectl`
+
+It also:
+
+- configures `crictl`
+- adds the Kubernetes apt repository
+- enables `kubelet`
+- restarts containerd
+
+### Note for corporate proxy or TLS inspection networks
+
+If the guest VM sits behind a corporate proxy or a TLS inspection layer, this
+step may fail before package installation starts because the guest does not yet
+trust the corporate root certificates.
+
+In that case, install the required corporate root certificates into the vm
+trust store first, then re-run `make install-dependencies` from the host.
+
+```bash
+limatctl shell <vm1>
+sudo mkdir -p /usr/local/share/ca-certificates
+sudo cp /path/to/corporate-root-certs/*.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates --fresh
+```
+
+If the environment also requires explicit proxy variables, set them in the
+guest shell before running the install scripts using the values provided by the
+local network or corporate environment.
+
+After that, re-run:
+
+```bash
+make install-dependencies
+```
+
+The script performs a simple HTTPS preflight and fails early with a more useful
+message instead of failing deep inside `apt` or `curl`.
+
+## Step 3: Initialize the Control Plane
+
+The preferred host-side target for this step is:
+
+```bash
+make init-control-plane
+```
+
+Internally, that host-side target invokes the guest-side `3-cluster-init.sh`
+helper inside the control-plane VM.
+
+That helper does more than a plain `kubeadm init` command. It builds a
+`kubeadm` config file and then initializes the cluster with choices that match
+this lab.
+
+### What `3-cluster-init.sh` actually configures
+
+The script creates a kubeadm config with:
+
+- `containerd` as the CRI socket
+- `kube-proxy` disabled
+- pod CIDR `10.254.0.0/16`
+- service CIDR `10.255.0.0/16`
+- cluster name `lima-vm-cluster`
+
+It also:
+
+- pre-pulls Kubernetes images
+- uploads control plane certs for future joins
+- removes the control plane taint so the control plane can run workloads
+- rewrites the kubeconfig server address to `127.0.0.1`
+- copies kubeconfig into both root's home and the invoking guest user's home
+
+### Why disable `kube-proxy`
+
+This lab installs Cilium with `kubeProxyReplacement=true`, so the script skips
+`kube-proxy` up front. That keeps the cluster configuration aligned with the
+networking stack we install next.
+
+### Why remove the control plane taint
+
+In production we usually keep workloads off the control plane. In a small lab,
+removing the taint is useful because we only have three nodes and may want to
+run extra test workloads without reserving the control plane strictly for
+control plane components.
+
+## Step 4: Join the Worker Nodes
+
+Once the control plane is initialized, exit back to your Mac host and run:
+
+```bash
+make join-worker-nodes
+```
+
+That target calls `3b-join-worker-nodes.sh`, which:
+
+- generates a fresh `kubeadm join` command from the control plane
+- installs Kubernetes dependencies on each worker if needed
+- joins `k8s-worker1` and `k8s-worker2` to the cluster
+- prints the resulting node list at the end
+
+This is the piece that turns the lab from "one initialized control plane plus
+two extra VMs" into an actual 3-node cluster.
+
+If the workers also need extra trust roots or explicit proxy variables for
+outbound HTTPS, fix that in the VMs first and then re-run
+`make join-worker-nodes`.
+
+## Step 5: Configure kubectl on the Mac Host
+
+Once the control plane is initialized, copy the kubeconfig back to macOS:
+
+```bash
+make copy-kubeconfig
 export KUBECONFIG=~/.kube/config.k8s-on-macos
 ```
 
-### **Step 4: Install Networking and Monitoring**
+Verify access from the host:
 
-Networking and monitoring are critical components of a Kubernetes cluster. We use [Cilium](https://cilium.io/) as the container networking interface (CNI) because it provides advanced networking features, such as network policies and load balancing, and replaces the default `kube-proxy`. For monitoring, we use Prometheus and Grafana, which are widely adopted tools for observability in Kubernetes.
-
-#### Steps to Install Networking and Monitoring
-
-1. Install Cilium for networking:
-   ```bash
-   # Install Cilium CLI
-   curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/download/v0.12.0/cilium-linux-amd64.tar.gz
-   tar xzvf cilium-linux-amd64.tar.gz
-   sudo mv cilium /usr/local/bin/
-
-   # Deploy Cilium
-   cilium install
-   cilium status
-   ```
-
-2. Install Prometheus and Grafana for monitoring:
-   ```bash
-   # Deploy Prometheus
-   kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml
-
-   # Deploy Grafana
-   kubectl apply -f https://raw.githubusercontent.com/grafana/helm-charts/main/charts/grafana/templates/deployment.yaml
-   ```
-
-### **Step 5: Verify Cluster**
 ```bash
-# Check nodes
-kubectl get nodes
-
-# Check pods
-kubectl get pods -n kube-system
+kubectl get nodes -o wide
 ```
 
-## Test Your Cluster
+The control plane init script rewrites the kubeconfig server address to
+`127.0.0.1`, which is why this works cleanly from the Mac host.
 
-### **Deploy a Test Application**
+## Step 6: Install Cilium
+
+Next, install Cilium using the host-side Make target:
+
 ```bash
-# Deploy nginx
+make install-cilium
+```
+
+This script:
+
+- installs the Cilium CLI if needed
+- installs Helm if needed
+- adds the Cilium Helm repo
+- installs Cilium with `kubeProxyReplacement=true`
+- enables Hubble and Prometheus-related metrics
+
+The script also detects the Kubernetes API address automatically:
+
+- in the single control plane flow it uses the control-plane node IP
+- in the HA flow it uses `controlPlaneEndpoint` from the kubeadm config
+
+That matters because the old hardcoded HA VIP did not work for the single
+control plane lab.
+
+The script also sets the pod CIDR to match the kubeadm config:
+
+```text
+10.254.0.0/16
+```
+
+That alignment matters. If the CNI and kubeadm disagree about pod networking,
+the cluster will not behave correctly.
+
+## Step 7: Enable Monitoring
+
+If you want the extra monitoring pieces, run:
+
+```bash
+make install-monitoring
+```
+
+This script reuses the Cilium Helm values and enables the monitoring example
+manifests that ship with Cilium 1.17.3.
+
+At that point you should have the pieces needed for Prometheus and Grafana in a
+small lab environment.
+
+## Step 8: Verify the Cluster
+
+From your Mac host:
+
+```bash
+export KUBECONFIG=~/.kube/config.k8s-on-macos
+kubectl get nodes -o wide
+kubectl get pods -A
+```
+
+From the control plane VM, you can also verify Cilium:
+
+```bash
+cilium status --wait
+```
+
+Things to check:
+
+- all three nodes show up
+- the nodes eventually become `Ready`
+- `kube-system` pods are healthy
+- Cilium reports ready status
+
+## Step 9: Deploy a Test Workload
+
+A quick smoke test is to deploy nginx:
+
+```bash
 kubectl run nginx --image=nginx --port=80
-kubectl expose pod nginx --type=NodePort
-
-# Check if it's running
+kubectl expose pod nginx --type=NodePort --port=80
 kubectl get pods
-kubectl get services
+kubectl get svc nginx
 ```
 
-### **Access Monitoring**
-```bash
-# Access Prometheus
-kubectl port-forward -n kube-system svc/prometheus 9090:9090
-# Open http://localhost:9090
-
-# Access Grafana
-kubectl port-forward -n kube-system svc/grafana 3000:3000
-# Open http://localhost:3000
-```
-
-### **Step 6: Clean Up**
-
-After completing the lab, you can clean up by deleting the VMs and the `k8s-lab` folder:
-
-```bash
-# Stop and delete all VMs
-limactl delete k8s-control-plane
-limactl delete k8s-worker1
-limactl delete k8s-worker2
-
-# Remove the k8s-lab folder
-rm -rf ~/k8s-lab
-```
+Because the template forwards the NodePort range, you can also inspect the
+assigned service port and test it from the host.
 
 ## Troubleshooting
 
-### **Common Issues**
+### VMs do not start
 
-**VMs won't start:**
+Check Lima state first:
+
 ```bash
-# Check Lima status
 limactl list
-# Restart if needed
-limactl start k8s-control-plane
 ```
 
-**kubectl not working:**
+If an instance is broken, stop and recreate it.
+
+### `2-install-deps.sh` fails with HTTPS or certificate errors
+
+That means the guest trust store is not sufficient for the network you are on.
+Install the required trust roots in the guest and re-run `make install-dependencies`.
+
+### Workers do not join
+
+Run the helper again:
+
 ```bash
-# Check kubeconfig
+make join-worker-nodes
+```
+
+The worker join script is idempotent enough for normal retry use. If a worker
+already has `/etc/kubernetes/kubelet.conf`, it is treated as already joined.
+
+### `kubectl` cannot reach the cluster
+
+Make sure you exported the right kubeconfig:
+
+```bash
 export KUBECONFIG=~/.kube/config.k8s-on-macos
 kubectl get nodes
 ```
 
-**Pods not starting:**
+If the kubeconfig file was copied before the control plane init completed,
+re-copy it.
+
+### Pods stay pending or nodes stay `NotReady`
+
+Check system pods and Cilium status:
+
 ```bash
-# Check CNI status
-kubectl get pods -n kube-system
-# Restart Cilium if needed
-sudo ./shell/4-cilium.sh
+kubectl get pods -A
+limactl shell k8s-control-plane cilium status --wait
 ```
 
-## What we Learned
+Also confirm that the pod CIDR in the kubeadm config matches the Cilium Helm
+settings.
 
-- How Kubernetes clusters are built from scratch
-- The role of control plane and worker nodes
-- Container networking with Cilium
-- Monitoring with Prometheus and Grafana
-- Basic kubectl commands
+### The lab feels under-provisioned
 
-## Next Steps
+The current template uses `2GiB` memory and `8GiB` disk per VM. That is enough
+for a basic lab, but it is not generous. If you add more workloads or heavy
+observability components, increase the VM resources.
 
-- Deploy your own applications
-- Learn about Kubernetes services and ingress
-- Explore persistent storage
-- Try advanced networking features
+## Clean Up
 
-## Reference
-[kubeadm config](https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta3/)
+To remove all Lima VMs created for the lab:
 
-## Repository
-Find the complete lab setup and scripts in the [k8s-lab folder](https://github.com/ypeavler/lima-k8s) of this repository.
+```bash
+make clean-lima-vms
+```
 
----
+Or remove them manually:
 
-*Perfect for beginners who want to understand how Kubernetes clusters work under the hood!*
+```bash
+limactl delete k8s-control-plane
+limactl delete k8s-worker1
+limactl delete k8s-worker2
+```
