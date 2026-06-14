@@ -145,7 +145,7 @@ sequenceDiagram
     Note over S: Generate keypair + CSR
     S->>LE: Request certificate for yourdomain.com
     LE->>S: Issue challenge: prove you control this domain
-    Note over S: HTTP-01: place token at<br/>http://yourdomain.com/.well-known/acme-challenge/<token><br/>— OR —<br/>DNS-01: create TXT record at _acme-challenge.yourdomain.com
+    Note over S: HTTP-01: place token at<br/>http://yourdomain.com/.well-known/acme-challenge/TOKEN<br/>— OR —<br/>DNS-01: create TXT record at _acme-challenge.yourdomain.com
     LE->>S: Verify challenge ✓
     LE->>S: Return signed certificate (90-day TTL)
     Note over S: ACME client (certbot, cert-manager, Caddy)<br/>handles renewal automatically
