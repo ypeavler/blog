@@ -1,5 +1,5 @@
 ---
-title: "Cryptographic Basics in a Hurry: Public Key Cryptography, Certificates & TLS (Q&A Format)"
+title: "Cryptographic Basics in a Hurry: Public Key Cryptography, Certificates & TLS"
 categories: Learn in a hurry
 author:
 - Yuva Peavler

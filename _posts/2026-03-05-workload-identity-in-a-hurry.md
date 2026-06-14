@@ -9,8 +9,6 @@ If you need a networking primer before diving in, check out [Networking in a Hur
 If you need a Kubernetes primer, check out [Kubernetes in a Hurry](./2026-01-02-kubernetes-in-a-hurry.md).
 If you need a PKI and TLS primer, check out [Cryptographic Basics in a Hurry](./2026-03-05-cryptographic-basics-in-a-hurry.md).
 
-Want to go deeper after this?
-- [Workload Identity Deep Dives](../2026-03-05-workload-identity-deep-dives.md) — TPM bootstrap, Interlace, Seamstress, Vault CA, federation internals, the bootstrapper, Workload API, CSI driver
 
 /// note | Analogy key
 Throughout this post a consistent **passport/border control** analogy is used.

@@ -1,7 +1,6 @@
-
 ---
 layout: post
-title: "Podman and Minikube"
+title: "Podman and Minikube - A quickstart guide"
 categories: Local kubernetes
 author:
 - Yuva Peavler
@@ -17,6 +16,7 @@ Follow the steps to setup podman as Docker replacement with Minikube on macOS.
 ## Setup
 
 ### Install Podman
+
 ```bash
 brew install podman podman-desktop
 podman machine init
@@ -24,12 +24,14 @@ podman machine start
 ```
 
 ### Add Corporate Certificates
+
 ```bash
 podman machine ssh
 # Add any corp certificates inside the machine if needed
 ```
 
 ### Create Docker Alias
+
 ```bash
 sudo tee -a /usr/local/bin/docker <<EOF
 #!/bin/bash
@@ -39,6 +41,7 @@ sudo chmod +x /usr/local/bin/docker
 ```
 
 ### VS Code Configuration
+
 If you use devcontainers a lot and want to use podman instead of docker.
 
 ```json
@@ -48,20 +51,24 @@ If you use devcontainers a lot and want to use podman instead of docker.
 ```
 
 ### Install Minikube
+
 ```bash
 brew install minikube
 ```
 
 ### Start Cluster
+
 ```bash
 # Multi-node cluster
 minikube start --driver=podman --embed-certs --nodes=3 --cpus=2 --memory=2048
 
 # With CRI-O runtime
-minikube start --driver=podman --embed-certs --nodes=3 --cpus=2 --memory=2048 --container-runtime=cri-o -p test-cluster
+minikube start --driver=podman --embed-certs --nodes=3 --cpus=2 \
+  --memory=2048 --container-runtime=cri-o -p test-cluster
 ```
 
 ### Enable Registry
+
 ```bash
 minikube addons enable registry
 ```
@@ -69,6 +76,7 @@ minikube addons enable registry
 ## Test Setup
 
 ### Deploy Application
+
 ```bash
 # Deploy nginx (ARM images for Apple Silicon)
 kubectl create deployment hello-minikube --image=docker.io/arm64v8/nginx:latest
@@ -76,6 +84,7 @@ kubectl expose deployment hello-minikube --type=NodePort --port=80
 ```
 
 ### Access Application
+
 ```bash
 # Access via Minikube service
 minikube service hello-minikube
@@ -83,10 +92,10 @@ minikube service hello-minikube
 minikube service hello-minikube -p test-cluster
 ```
 
-
 ## Commands
 
 ### Podman
+
 ```bash
 podman machine list
 podman machine stop/start
@@ -95,6 +104,7 @@ podman images
 ```
 
 ### Minikube
+
 ```bash
 minikube status
 minikube stop/start/delete
@@ -105,6 +115,7 @@ minikube dashboard
 ```
 
 ### Kubernetes
+
 ```bash
 kubectl get nodes
 kubectl get pods -A

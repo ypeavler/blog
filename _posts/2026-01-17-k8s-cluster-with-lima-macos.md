@@ -1,4 +1,10 @@
-# Kubernetes Lab with kubeadm and Lima on macOS
+---
+layout: post
+title: "Kubernetes Lab with kubeadm and Lima on macOS"
+categories: Local kubernetes
+author:
+- Yuva Peavler
+---
 
 This post walks through a local Kubernetes lab that runs on Lima VMs on
 macOS. The goal is to get a

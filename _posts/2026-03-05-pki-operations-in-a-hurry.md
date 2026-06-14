@@ -1,5 +1,5 @@
 ---
-title: "PKI Operations in a Hurry: Let's Encrypt, CSRs & Internal PKI (Q&A Format)"
+title: "PKI Operations in a Hurry: Let's Encrypt, CSRs & Internal PKI"
 categories: Learn in a hurry
 author:
 - Yuva Peavler
