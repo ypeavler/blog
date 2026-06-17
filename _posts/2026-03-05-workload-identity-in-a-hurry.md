@@ -162,6 +162,20 @@ The border agent's reference book: it contains the official seal patterns for ev
 
 ---
 
+<a id="trust-domain"></a>
+
+#### Q: What is a trust domain?
+
+A SPIFFE trust domain is an identity namespace backed by an issuing authority with a set of cryptographic keys. Those keys serve as the cryptographic anchor for all identities in the domain.
+
+The spec defines a **1:N relationship** between a trust domain and its keys — a single trust domain can be backed by multiple keys and key types. This is necessary for root rotation (two keys are valid simultaneously during the transition) and multi-protocol support (separate keys for X.509 SVIDs and JWT SVIDs).
+
+`global.trust.example` is one example trust domain. Any two workloads in the same trust domain can verify each other's SVIDs without additional configuration — they both trust the same set of keys. To trust SVIDs from another trust domain, federation is needed.
+
+The spec strongly advises against sharing cryptographic keys across trust domains. If the same root key backs both `staging.example.com` and `prod.example.com`, a naïve verifier that trusts the key without checking the trust domain name could accept a staging identity as a production identity. The safe practice is one root key per trust domain.
+
+---
+
 <a id="bundle-format"></a>
 
 #### Q: The spec says SPIFFE bundles are "not meant for direct consumption by workloads." Does that mean workloads don't get the bundle?
@@ -185,20 +199,6 @@ SPIFFE Bundle (JWK Set)          ← control plane format
 ```
 
 The SPIRE agent converts the `x509-svid` JWK entries into `*x509.Certificate` objects and delivers them to the workload as a proper X.509 trust bundle. The workload plugs those directly into its TLS configuration.
-
----
-
-<a id="trust-domain"></a>
-
-#### Q: What is a trust domain?
-
-A SPIFFE trust domain is an identity namespace backed by an issuing authority with a set of cryptographic keys. Those keys serve as the cryptographic anchor for all identities in the domain.
-
-The spec defines a **1:N relationship** between a trust domain and its keys — a single trust domain can be backed by multiple keys and key types. This is necessary for root rotation (two keys are valid simultaneously during the transition) and multi-protocol support (separate keys for X.509 SVIDs and JWT SVIDs).
-
-`global.trust.example` is one example trust domain. Any two workloads in the same trust domain can verify each other's SVIDs without additional configuration — they both trust the same set of keys. To trust SVIDs from another trust domain, federation is needed.
-
-The spec strongly advises against sharing cryptographic keys across trust domains. If the same root key backs both `staging.example.com` and `prod.example.com`, a naïve verifier that trusts the key without checking the trust domain name could accept a staging identity as a production identity. The safe practice is one root key per trust domain.
 
 ---
 

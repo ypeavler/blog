@@ -130,6 +130,21 @@ The hardest part is not issuing certificates — it's renewing them before they 
 
 ---
 
+<a id="what-is-a-csr"></a>
+
+#### Q: What is a CSR?
+
+A CSR (Certificate Signing Request) is the document sent to a CA when requesting a certificate. It contains:
+- The public key
+- The identity being claimed (domain name, organization, etc.)
+- A signature with the private key (proving ownership of the private key in the request)
+
+The CA verifies the identity claim, then signs the CSR's public key and identity together — producing the certificate.
+
+The private key never leaves the server. The CA never sees it. The CA is vouching for the binding between the public key and the identity, not issuing a keypair.
+
+---
+
 <a id="lets-encrypt"></a>
 
 #### Q: How does Let's Encrypt work?
@@ -152,21 +167,6 @@ sequenceDiagram
 </div>
 
 The 90-day TTL is intentional — it forces automation and limits the blast radius of a compromised cert. Let's Encrypt issues ~5 million certificates per day.
-
----
-
-<a id="what-is-a-csr"></a>
-
-#### Q: What is a CSR?
-
-A CSR (Certificate Signing Request) is the document sent to a CA when requesting a certificate. It contains:
-- The public key
-- The identity being claimed (domain name, organization, etc.)
-- A signature with the private key (proving ownership of the private key in the request)
-
-The CA verifies the identity claim, then signs the CSR's public key and identity together — producing the certificate.
-
-The private key never leaves the server. The CA never sees it. The CA is vouching for the binding between the public key and the identity, not issuing a keypair.
 
 ---
 
